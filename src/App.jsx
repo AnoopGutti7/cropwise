@@ -84,6 +84,7 @@ const rg = {
   loginRow:{ textAlign:"center",fontSize:13,color:"#7a5030",marginTop:2,fontFamily:"'Lato',sans-serif" },
   loginLink:{ color:"#b85c00",fontWeight:700,cursor:"pointer",textDecoration:"underline",textUnderlineOffset:2 },
   bottomScene:{ position:"absolute",bottom:0,left:0,right:0,zIndex:5 },
+  backBtn:{ position:"absolute",top:18,left:18,zIndex:30,background:"rgba(255,248,230,0.95)",border:"2px solid rgba(120,80,20,0.35)",borderRadius:50,width:44,height:44,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:26,color:"#7a3a00",boxShadow:"0 3px 12px rgba(120,60,0,0.2)",backdropFilter:"blur(8px)",fontFamily:"sans-serif",lineHeight:1 },
 };
 
 const AUTH_CSS = `
@@ -307,7 +308,7 @@ const sp={
 // ═══════════════════════════════════════════════════════════════════════════════
 //  REGISTER SCREEN
 // ═══════════════════════════════════════════════════════════════════════════════
-function RegisterScreen({ onSignUp, onNavigate }) {
+function RegisterScreen({ onSignUp, onNavigate, onBack }) {
   const [form,setForm]=useState({name:"",phone:"",password:"",confirm:""});
   const [focused,setFocused]=useState(null);
   const [visible,setVisible]=useState({password:false,confirm:false});
@@ -328,6 +329,7 @@ function RegisterScreen({ onSignUp, onNavigate }) {
       <style>{AUTH_CSS}</style>
       <div style={rg.bg}/><div style={rg.bgGlow}/>
       <TopCropDeco/>
+      {onBack && <button style={rg.backBtn} onClick={onBack} aria-label="Go back">‹</button>}
       <div className="reg-title" style={rg.titleWrap}>
         <div style={rg.logo}><span style={rg.cropWord}>Crop</span><span style={rg.wiseWord}>Wise</span></div>
         <div style={rg.heading}>Register</div>
@@ -373,7 +375,7 @@ function RegisterScreen({ onSignUp, onNavigate }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 //  LOGIN SCREEN  — Simulated OTP (demo: use 1234)
 // ═══════════════════════════════════════════════════════════════════════════════
-function LoginScreen({ onGetOtp, onNavigate }) {
+function LoginScreen({ onGetOtp, onNavigate, onBack }) {
   const [phone,setPhone]=useState("");
   const [submitted,setSubmitted]=useState(false);
   const [loading,setLoading]=useState(false);
@@ -395,6 +397,7 @@ function LoginScreen({ onGetOtp, onNavigate }) {
       <style>{AUTH_CSS}</style>
       <div style={rg.bg}/><div style={rg.bgGlow}/>
       <TopCropDeco/>
+      {onBack && <button style={rg.backBtn} onClick={onBack} aria-label="Go back">‹</button>}
       <div className="reg-title" style={{...rg.titleWrap,paddingBottom:0}}>
         <div style={rg.logo}><span style={rg.cropWord}>Crop</span><span style={rg.wiseWord}>Wise</span></div>
         <div style={rg.heading}>Login</div>
@@ -454,7 +457,7 @@ function LoginScreen({ onGetOtp, onNavigate }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 //  OTP SCREEN  — demo mode (OTP: 1234)
 // ═══════════════════════════════════════════════════════════════════════════════
-function OtpScreen({ onLogin, onNavigate }) {
+function OtpScreen({ onLogin, onNavigate, onBack }) {
   const [otp,setOtp]=useState(["","","",""]);
   const [submitted,setSubmitted]=useState(false);
   const [loading,setLoading]=useState(false);
@@ -483,6 +486,7 @@ function OtpScreen({ onLogin, onNavigate }) {
       <style>{AUTH_CSS}</style>
       <div style={rg.bg}/><div style={rg.bgGlow}/>
       <TopCropDeco/>
+      {onBack && <button style={rg.backBtn} onClick={onBack} aria-label="Go back">‹</button>}
       <div className="reg-title" style={{...rg.titleWrap,paddingBottom:0}}>
         <div style={rg.logo}><span style={rg.cropWord}>Crop</span><span style={rg.wiseWord}>Wise</span></div>
         <div style={rg.heading}>Enter OTP</div>
@@ -922,15 +926,15 @@ function RiskMeter({value, lang, showWarning}) {
   const warning = tl.riskWarning ? tl.riskWarning(value) : null;
   return(
     <div style={{marginTop:6}}>
-      <div style={{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:4,color:"#94a3b8"}}>
+      <div style={{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:4,color:"#9a6030"}}>
         <span>{e} {label}</span>
         <span style={{color:c,fontWeight:700}}>{value}%</span>
       </div>
-      <div style={{background:"#1e293b",borderRadius:99,height:7,overflow:"hidden"}}>
+      <div style={{background:"rgba(180,120,40,0.15)",borderRadius:99,height:7,overflow:"hidden"}}>
         <div style={{width:`${value}%`,background:`linear-gradient(90deg,${c}88,${c})`,height:"100%",borderRadius:99,transition:"width 0.8s"}}/>
       </div>
       {showWarning && warning && (
-        <div style={{marginTop:8,padding:"8px 10px",background:value>=50?"#1c0505":value>=30?"#1c1000":"#021a0d",borderRadius:8,fontSize:12,color:value>=50?"#fca5a5":value>=30?"#fde68a":"#86efac",lineHeight:1.5}}>
+        <div style={{marginTop:8,padding:"8px 10px",background:value>=50?"rgba(180,0,0,0.07)":value>=30?"rgba(180,100,0,0.07)":"rgba(40,120,0,0.07)",borderRadius:8,fontSize:12,color:value>=50?"#cc2200":value>=30?"#b85c00":"#2a7a00",lineHeight:1.5,border:`1px solid ${value>=50?"rgba(180,0,0,0.15)":value>=30?"rgba(180,100,0,0.15)":"rgba(40,120,0,0.15)"}`}}>
           {warning}
         </div>
       )}
@@ -940,20 +944,20 @@ function RiskMeter({value, lang, showWarning}) {
 
 function LiveTag({live}) {
   return live
-    ? <span style={{fontSize:9,background:"#052e16",color:"#4ade80",borderRadius:4,padding:"1px 6px",fontWeight:700,marginLeft:5}}>🟢 LIVE</span>
-    : <span style={{fontSize:9,background:"#1c1a05",color:"#fbbf24",borderRadius:4,padding:"1px 6px",fontWeight:700,marginLeft:5}}>EST</span>;
+    ? <span style={{fontSize:9,background:"rgba(120,60,0,0.08)",color:"#2a7a00",borderRadius:4,padding:"1px 6px",fontWeight:700,marginLeft:5}}>🟢 LIVE</span>
+    : <span style={{fontSize:9,background:"rgba(180,100,0,0.07)",color:"#b85c00",borderRadius:4,padding:"1px 6px",fontWeight:700,marginLeft:5}}>EST</span>;
 }
 
 function LangToggle({lang, setLang}) {
   const langs = [["en","EN"],["hi","हि"],["kn","ಕ"]];
   return (
-    <div style={{display:"flex",gap:4,background:"#0a1628",borderRadius:99,padding:3,border:"1px solid #1e293b"}}>
+    <div style={{display:"flex",gap:4,background:"rgba(120,60,0,0.08)",borderRadius:99,padding:3,border:"1px solid rgba(120,60,0,0.18)",marginTop:10}}>
       {langs.map(([code,label])=>(
         <button key={code} onClick={()=>setLang(code)} style={{
           padding:"5px 10px",borderRadius:99,border:"none",cursor:"pointer",
           fontSize:12,fontWeight:700,fontFamily:"inherit",
-          background:lang===code?"#4ade80":"transparent",
-          color:lang===code?"#020c18":"#475569",
+          background:lang===code?"linear-gradient(135deg,#7a3a00,#b85c00)":"transparent",
+          color:lang===code?"#fff8ee":"#9a6030",
           transition:"all .2s",
         }}>{label}</button>
       ))}
@@ -962,16 +966,17 @@ function LangToggle({lang, setLang}) {
 }
 
 const CSS=`@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800;900&display=swap');
-*{box-sizing:border-box}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#1e293b;border-radius:99px}
-.hw:hover{transform:translateY(-2px);border-color:#166534!important;transition:all .2s}
-.bb:hover{transform:translateY(-2px);box-shadow:0 12px 40px #4ade8044;transition:all .15s}
-.ob:hover{border-color:#4ade80!important;color:#4ade80!important;transition:all .2s}
-.nb:hover{background:#0a1628!important;transition:all .2s}
+*{box-sizing:border-box}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:rgba(120,60,0,0.2);border-radius:99px}
+.hw:hover{transform:translateY(-2px);border-color:rgba(120,60,0,0.4)!important;box-shadow:0 8px 24px rgba(120,60,0,0.12)!important;transition:all .2s}
+.bb:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(120,60,0,0.3)!important;transition:all .15s}
+.ob:hover{border-color:rgba(120,60,0,0.5)!important;color:#7a3a00!important;transition:all .2s}
+.nb:hover{background:rgba(120,60,0,0.08)!important;transition:all .2s}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
-.fade{animation:fadeUp .35s ease forwards}select option{background:#0f172a}`;
+.fade{animation:fadeUp .35s ease forwards}select option{background:#fff8ee;color:#3a1f00}
+input,select{font-family:'Sora',sans-serif}`;
 
-const bdg=(p)=>({display:"inline-block",padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:700,background:p==="High"?"#052e16":p==="Medium"?"#1c1a05":"#1c0505",color:p==="High"?"#4ade80":p==="Medium"?"#fbbf24":"#f87171",border:`1px solid ${p==="High"?"#166534":p==="Medium"?"#854d0e":"#7f1d1d"}`});
+const bdg=(p)=>({display:"inline-block",padding:"3px 10px",borderRadius:99,fontSize:11,fontWeight:700,background:p==="High"?"rgba(40,120,0,0.1)":p==="Medium"?"rgba(180,100,0,0.1)":"rgba(180,0,0,0.08)",color:p==="High"?"#2a7a00":p==="Medium"?"#b85c00":"#cc2200",border:`1px solid ${p==="High"?"rgba(40,120,0,0.25)":p==="Medium"?"rgba(180,100,0,0.25)":"rgba(180,0,0,0.2)"}`});
 const NAV_IDS=[{id:"home",icon:"🏠",tk:"navHome"},{id:"plan",icon:"🌱",tk:"navPlan"},{id:"market",icon:"📊",tk:"navMarket"},{id:"profit",icon:"💰",tk:"navProfit"},{id:"alerts",icon:"⚠️",tk:"navAlerts"}];
 
 function CropWiseDashboard({ userName, onLogout }) {
@@ -1037,7 +1042,25 @@ function CropWiseDashboard({ userName, onLogout }) {
   const getPrice = (crop) => mandiPrices[crop] || CROP_META[crop]?.fallbackPrice || 3000;
   const isLive   = (crop) => !!mandiPrices[crop];
 
-  const go = (s)=>{ setScreen(s); setExpanded(null); };
+  const [navHistory, setNavHistory] = useState(["home"]);
+
+  const go = (s) => {
+    setScreen(s);
+    setExpanded(null);
+    setNavHistory(prev => prev[prev.length-1] === s ? prev : [...prev, s]);
+  };
+
+  const goBack = () => {
+    setNavHistory(prev => {
+      if (prev.length <= 1) return prev;
+      const next = prev.slice(0, -1);
+      setScreen(next[next.length - 1]);
+      setExpanded(null);
+      return next;
+    });
+  };
+
+  const canGoBack = navHistory.length > 1 && screen !== "home";
 
   const detectLocation = async()=>{
     setLocating(true); setLocErr("");
@@ -1129,57 +1152,57 @@ function CropWiseDashboard({ userName, onLogout }) {
   const blobs=[["15%","-5%","#22c55e"],["55%","65%","#0ea5e9"],["85%","25%","#a855f7"]];
 
   if (isDesktop) return (
-    <div style={{display:"flex",minHeight:"100vh",background:"#020c18",color:"#e2e8f0",fontFamily:"'Sora',sans-serif",overflow:"hidden"}}>
+    <div style={{display:"flex",minHeight:"100vh",background:"linear-gradient(170deg,#fff8ee 0%,#fdf0d8 40%,#f5e4b8 75%,#e8d090 100%)",color:"#3a1f00",fontFamily:"'Sora',sans-serif",overflow:"hidden"}}>
       <style>{CSS}</style>
-      {blobs.map(([top,l,c],i)=><div key={i} style={{position:"fixed",top:top,left:l,width:500,height:500,borderRadius:"50%",background:c,filter:"blur(120px)",opacity:0.09,pointerEvents:"none",zIndex:0}}/>)}
 
       {/* Sidebar */}
-      <aside style={{width:240,minHeight:"100vh",background:"linear-gradient(180deg,#0a1628,#050e1a)",borderRight:"1px solid #1e293b",display:"flex",flexDirection:"column",position:"fixed",top:0,left:0,bottom:0,zIndex:10}}>
+      <aside style={{width:240,minHeight:"100vh",background:"linear-gradient(180deg,rgba(255,248,230,0.98),rgba(253,240,216,0.98))",borderRight:"1.5px solid rgba(180,120,40,0.2)",display:"flex",flexDirection:"column",position:"fixed",top:0,left:0,bottom:0,zIndex:10,boxShadow:"2px 0 20px rgba(120,60,0,0.08)"}}>
         <div style={{padding:"28px 24px 16px"}}>
-          <div style={{fontSize:24,fontWeight:900,letterSpacing:"-0.5px"}}><span style={{color:"#4ade80"}}>Crop</span>Wise<span style={{fontSize:10,background:"#052e16",color:"#4ade80",borderRadius:6,padding:"2px 7px",marginLeft:8,fontWeight:700,verticalAlign:"middle"}}>AI</span></div>
-          <div style={{fontSize:11,color:"#475569",marginTop:4,fontWeight:600}}>{t.appTagline}</div>
+          <div style={{fontSize:24,fontWeight:900,letterSpacing:"-0.5px",fontFamily:"'Cinzel',serif"}}><span style={{color:"#7a3a00"}}>Crop</span><span style={{color:"#c87010"}}>Wise</span><span style={{fontSize:10,background:"rgba(120,60,0,0.1)",color:"#7a3a00",borderRadius:6,padding:"2px 7px",marginLeft:8,fontWeight:700,verticalAlign:"middle",border:"1px solid rgba(120,60,0,0.2)"}}>AI</span></div>
+          <div style={{fontSize:11,color:"#9a6030",marginTop:4,fontWeight:600}}>{t.appTagline}</div>
           <LangToggle lang={lang} setLang={setLang}/>
 
           {weather && (
-            <div style={{marginTop:14,padding:"12px",background:"#052e16",borderRadius:12,border:"1px solid #166534"}}>
-              <div style={{fontSize:10,color:"#4ade8066",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:6}}>{t.liveWeather}</div>
+            <div style={{marginTop:14,padding:"12px",background:"rgba(120,60,0,0.06)",borderRadius:12,border:"1px solid rgba(120,60,0,0.15)"}}>
+              <div style={{fontSize:10,color:"#b85c00",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:6}}>{t.liveWeather}</div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
                 <div style={{textAlign:"center"}}>
-                  <div style={{fontSize:18,fontWeight:900,color:"#4ade80"}}>{weather.rainfallMm}<span style={{fontSize:10,fontWeight:400}}>mm</span></div>
-                  <div style={{fontSize:9,color:"#475569"}}>{t.rain30day}</div>
+                  <div style={{fontSize:18,fontWeight:900,color:"#2a7a00"}}>{weather.rainfallMm}<span style={{fontSize:10,fontWeight:400}}>mm</span></div>
+                  <div style={{fontSize:9,color:"#9a6030"}}>{t.rain30day}</div>
                 </div>
                 <div style={{textAlign:"center"}}>
-                  <div style={{fontSize:18,fontWeight:900,color:"#f59e0b"}}>{weather.avgTempC}<span style={{fontSize:10,fontWeight:400}}>°C</span></div>
-                  <div style={{fontSize:9,color:"#475569"}}>{t.avgTempLabel}</div>
+                  <div style={{fontSize:18,fontWeight:900,color:"#b85c00"}}>{weather.avgTempC}<span style={{fontSize:10,fontWeight:400}}>°C</span></div>
+                  <div style={{fontSize:9,color:"#9a6030"}}>{t.avgTempLabel}</div>
                 </div>
               </div>
-              <div style={{marginTop:8,fontSize:11,color:"#4ade80",textAlign:"center",fontWeight:700}}>
+              <div style={{marginTop:8,fontSize:11,color:"#2a7a00",textAlign:"center",fontWeight:700}}>
                 {weather.rainfallLevel.toUpperCase()}
               </div>
             </div>
           )}
-          {weatherLoading && <div style={{marginTop:10,fontSize:11,color:"#475569"}}>{t.fetchingWeather}</div>}
+          {weatherLoading && <div style={{marginTop:10,fontSize:11,color:"#9a6030"}}>{t.fetchingWeather}</div>}
         </div>
 
         <nav style={{flex:1,padding:"0 12px"}}>
           {NAV_IDS.map(n=>{
             const active=screen===n.id||(screen==="results"&&n.id==="plan");
-            return(<div key={n.id} className="nb" onClick={()=>go(n.id)} style={{display:"flex",alignItems:"center",gap:12,padding:"11px 16px",borderRadius:12,cursor:"pointer",marginBottom:4,background:active?"linear-gradient(135deg,#052e16,#0a2010)":"transparent",color:active?"#4ade80":"#64748b",fontWeight:active?700:500,fontSize:14,border:active?"1px solid #166534":"1px solid transparent"}}><span style={{fontSize:18}}>{n.icon}</span>{t[n.tk]}</div>);
+            return(<div key={n.id} className="nb" onClick={()=>go(n.id)} style={{display:"flex",alignItems:"center",gap:12,padding:"11px 16px",borderRadius:12,cursor:"pointer",marginBottom:4,background:active?"linear-gradient(135deg,#7a3a00,#b85c00)":"transparent",color:active?"#fff8ee":"#7a5030",fontWeight:active?700:500,fontSize:14,border:active?"none":"1px solid transparent"}}><span style={{fontSize:18}}>{n.icon}</span>{t[n.tk]}</div>);
           })}
         </nav>
 
-        <div style={{padding:"16px 24px",borderTop:"1px solid #1e293b"}}>
-          <div style={{background:"#052e16",border:"1px solid #166534",borderRadius:10,padding:"10px 14px"}}>
-            <div style={{fontSize:10,color:"#4ade8066",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em"}}>{t.season}</div>
-            <div style={{fontSize:14,fontWeight:700,color:"#4ade80",marginTop:3}}>🌾 {getSeasonLabel()}</div>
+        <div style={{padding:"16px 24px",borderTop:"1.5px solid rgba(180,120,40,0.2)"}}>
+          <div style={{background:"rgba(120,60,0,0.08)",border:"1px solid rgba(120,60,0,0.18)",borderRadius:10,padding:"10px 14px"}}>
+            <div style={{fontSize:10,color:"#b85c00",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em"}}>{t.season}</div>
+            <div style={{fontSize:14,fontWeight:700,color:"#7a3a00",marginTop:3}}>🌾 {getSeasonLabel()}</div>
           </div>
-          {lastUpdated && <div style={{fontSize:10,color:"#1e3a2a",marginTop:8,textAlign:"center"}}>{t.pricesUpdated} {lastUpdated.toLocaleTimeString()}</div>}
+          {lastUpdated && <div style={{fontSize:10,color:"#9a6030",marginTop:8,textAlign:"center"}}>{t.pricesUpdated} {lastUpdated.toLocaleTimeString()}</div>}
         </div>
       </aside>
 
       {/* Main */}
       <main style={{marginLeft:240,width:"calc(100vw - 240px)",overflowY:"auto",minHeight:"100vh",position:"relative",zIndex:1}}>
         <div className="fade" key={screen} style={{padding:"32px 36px 60px"}}>
+          {canGoBack && <BackButton onBack={goBack} mobile={false}/>}
           <DesktopScreens {...shared}/>
         </div>
       </main>
@@ -1188,18 +1211,20 @@ function CropWiseDashboard({ userName, onLogout }) {
 
   // Mobile
   return(
-    <div style={{minHeight:"100vh",background:"#020c18",color:"#e2e8f0",fontFamily:"'Sora',sans-serif",overflow:"hidden"}}>
+    <div style={{minHeight:"100vh",background:"linear-gradient(170deg,#fff8ee 0%,#fdf0d8 40%,#f5e4b8 75%,#e8d090 100%)",color:"#3a1f00",fontFamily:"'Sora',sans-serif",overflow:"hidden"}}>
       <style>{CSS}</style>
-      {blobs.map(([_t,l,c],i)=><div key={i} style={{position:"fixed",top:_t,left:l,width:400,height:400,borderRadius:"50%",background:c,filter:"blur(100px)",opacity:0.12,pointerEvents:"none",zIndex:0}}/>)}
       <div style={{padding:"18px 16px 8px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"relative",zIndex:1}}>
-        <div style={{fontSize:20,fontWeight:900}}><span style={{color:"#4ade80"}}>Crop</span>Wise<span style={{fontSize:9,background:"#052e16",color:"#4ade80",borderRadius:6,padding:"2px 6px",marginLeft:6,fontWeight:700,verticalAlign:"middle"}}>AI</span></div>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
-          {weather && <div style={{fontSize:12,color:"#4ade80",fontWeight:700}}>🌧 {weather.rainfallMm}mm · {weather.avgTempC}°C</div>}
+          {canGoBack && <BackButton onBack={goBack} mobile={true}/>}
+          <div style={{fontSize:20,fontWeight:900}}><span style={{color:"#7a3a00"}}>Crop</span><span style={{color:"#c87010"}}>Wise</span><span style={{fontSize:9,background:"rgba(120,60,0,0.12)",color:"#7a3a00",borderRadius:6,padding:"2px 6px",marginLeft:6,fontWeight:700,verticalAlign:"middle",border:"1px solid rgba(120,60,0,0.2)"}}>AI</span></div>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          {weather && <div style={{fontSize:12,color:"#7a3a00",fontWeight:700}}>🌧 {weather.rainfallMm}mm · {weather.avgTempC}°C</div>}
           <LangToggle lang={lang} setLang={setLang}/>
         </div>
       </div>
       <div style={{display:"flex",gap:6,padding:"0 14px 14px",overflowX:"auto",position:"relative",zIndex:1}}>
-        {NAV_IDS.map(n=>{const active=screen===n.id||(screen==="results"&&n.id==="plan"); return<button key={n.id} onClick={()=>go(n.id)} style={{padding:"7px 13px",borderRadius:99,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,whiteSpace:"nowrap",background:active?"#4ade80":"#0f172a",color:active?"#020c18":"#64748b",transition:"all .2s"}}>{n.icon} {t[n.tk]}</button>;})}
+        {NAV_IDS.map(n=>{const active=screen===n.id||(screen==="results"&&n.id==="plan"); return<button key={n.id} onClick={()=>go(n.id)} style={{padding:"7px 13px",borderRadius:99,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,whiteSpace:"nowrap",background:active?"#7a3a00":"rgba(120,60,0,0.1)",color:active?"#fff8ee":"#7a5030",transition:"all .2s"}}>{n.icon} {t[n.tk]}</button>;})}
       </div>
       <div className="fade" key={screen} style={{position:"relative",zIndex:1,paddingBottom:40}}>
         <MobileScreens {...shared}/>
@@ -1209,33 +1234,56 @@ function CropWiseDashboard({ userName, onLogout }) {
 }
 
 // ══════════════════════════════════════════════════════════════════
+// BACK BUTTON COMPONENT
+// ══════════════════════════════════════════════════════════════════
+function BackButton({ onBack, mobile }) {
+  const [h, setH] = useState(false);
+  return (
+    <button onClick={onBack} onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)}
+      style={{
+        display:"flex", alignItems:"center", gap: mobile ? 4 : 8,
+        background: h ? "rgba(120,60,0,0.15)" : "rgba(255,248,230,0.85)",
+        border: `1.5px solid ${h ? "rgba(120,60,0,0.4)" : "rgba(120,80,20,0.2)"}`,
+        borderRadius: 99, padding: mobile ? "5px 10px" : "8px 16px 8px 12px",
+        cursor:"pointer", marginBottom: mobile ? 0 : 20,
+        backdropFilter:"blur(6px)",
+        boxShadow:"0 2px 8px rgba(120,60,0,0.1)",
+        transition:"all .2s",
+      }}>
+      <span style={{fontSize:20, color:"#7a3a00", lineHeight:1, transition:"transform .2s", display:"inline-block", transform: h?"translateX(-2px)":"none"}}>‹</span>
+      {!mobile && <span style={{fontSize:13, fontWeight:700, color: h?"#4a2200":"#7a5030", fontFamily:"'Lato',sans-serif", transition:"color .2s"}}>Back</span>}
+    </button>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════
 // DESKTOP SCREENS
 // ══════════════════════════════════════════════════════════════════
 function DesktopScreens(p) {
-  const card={background:"linear-gradient(145deg,#0f172a,#0a1628)",border:"1px solid #1e293b",borderRadius:20,padding:"24px 28px",marginBottom:20};
-  const lbl={fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.12em",color:"#4ade80",marginBottom:12};
-  const sel={width:"100%",padding:"12px 16px",background:"#0a1225",border:"1px solid #1e293b",borderRadius:12,color:"#e2e8f0",fontSize:14,outline:"none",appearance:"none",cursor:"pointer"};
-  const inp={width:"100%",padding:"12px 16px",background:"#0a1225",border:"1px solid #1e293b",borderRadius:12,color:"#e2e8f0",fontSize:14,outline:"none"};
-  const btn={width:"100%",padding:"15px",background:"linear-gradient(135deg,#4ade80,#22c55e)",border:"none",borderRadius:16,fontSize:15,fontWeight:800,color:"#020c18",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8};
+  const card={background:"rgba(255,252,242,0.88)",border:"1.5px solid rgba(180,120,40,0.2)",borderRadius:20,padding:"24px 28px",marginBottom:20,boxShadow:"0 4px 20px rgba(120,60,0,0.08)",backdropFilter:"blur(8px)"};
+  const lbl={fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.12em",color:"#b85c00",marginBottom:12};
+  const sel={width:"100%",padding:"12px 16px",background:"rgba(255,248,230,0.92)",border:"1.5px solid rgba(120,80,20,0.25)",borderRadius:12,color:"#3a1f00",fontSize:14,outline:"none",appearance:"none",cursor:"pointer"};
+  const inp={width:"100%",padding:"12px 16px",background:"rgba(255,248,230,0.92)",border:"1.5px solid rgba(120,80,20,0.25)",borderRadius:12,color:"#3a1f00",fontSize:14,outline:"none"};
+  const btn={width:"100%",padding:"15px",background:"linear-gradient(135deg,#7a3a00,#b85c00,#d47020)",border:"none",borderRadius:16,fontSize:15,fontWeight:800,color:"#fff8e8",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:"0 4px 16px rgba(140,60,0,0.3)"};
   const spin={animation:"spin 1s linear infinite",display:"inline-block"};
 
   if (p.screen==="home") return(<>
     {/* API key banner — only show to developers, phrased simply */}
     {!p.hasMandiKey && (
-      <div style={{background:"linear-gradient(135deg,#1c1a05,#0a1628)",border:"1px solid #854d0e",borderRadius:16,padding:"16px 22px",marginBottom:20,display:"flex",alignItems:"center",gap:14}}>
+      <div style={{background:"rgba(255,240,210,0.9)",border:"1.5px solid rgba(180,80,0,0.25)",borderRadius:16,padding:"16px 22px",marginBottom:20,display:"flex",alignItems:"center",gap:14}}>
         <span style={{fontSize:28}}>⚙️</span>
         <div style={{flex:1}}>
-          <div style={{fontWeight:700,color:"#fbbf24",marginBottom:4}}>{p.t.noKeyMsg}</div>
+          <div style={{fontWeight:700,color:"#b85c00",marginBottom:4}}>{p.t.noKeyMsg}</div>
         </div>
-        <div style={{fontSize:11,background:"#052e16",color:"#4ade80",borderRadius:8,padding:"6px 10px",fontWeight:700,textAlign:"center",whiteSpace:"nowrap"}}>Weather<br/>✅ LIVE</div>
+        <div style={{fontSize:11,background:"rgba(120,60,0,0.08)",color:"#2a7a00",borderRadius:8,padding:"6px 10px",fontWeight:700,textAlign:"center",whiteSpace:"nowrap"}}>Weather<br/>✅ LIVE</div>
       </div>
     )}
 
-    <div style={{background:"linear-gradient(135deg,#052e16,#0a1628,#1a1028)",border:"1px solid #14532d",borderRadius:24,padding:"40px 44px",marginBottom:24,display:"grid",gridTemplateColumns:"1fr 1fr",gap:32,alignItems:"center"}}>
+    <div style={{background:"linear-gradient(135deg,rgba(120,60,0,0.08),rgba(255,248,230,0.6))",border:"1px solid rgba(40,100,0,0.2)",borderRadius:24,padding:"40px 44px",marginBottom:24,display:"grid",gridTemplateColumns:"1fr 1fr",gap:32,alignItems:"center"}}>
       <div>
-        <div style={{fontSize:12,color:"#4ade80",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:14}}>🌾 {getSeasonLabel()} · Real-Time Intelligence</div>
-        <div style={{fontSize:44,fontWeight:900,letterSpacing:"-1.5px",lineHeight:1.05}}>{p.t.growSmarter}<br/><span style={{color:"#4ade80"}}>{p.t.earnBetter}</span></div>
-        <p style={{color:"#475569",fontSize:15,marginTop:14,lineHeight:1.7}}>{p.t.heroDesc}</p>
+        <div style={{fontSize:12,color:"#2a7a00",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:14}}>🌾 {getSeasonLabel()} · Real-Time Intelligence</div>
+        <div style={{fontSize:44,fontWeight:900,letterSpacing:"-1.5px",lineHeight:1.05}}>{p.t.growSmarter}<br/><span style={{color:"#2a7a00"}}>{p.t.earnBetter}</span></div>
+        <p style={{color:"#9a6030",fontSize:15,marginTop:14,lineHeight:1.7}}>{p.t.heroDesc}</p>
         <div style={{display:"flex",gap:12,marginTop:20}}>
           <button className="bb" style={{...btn,flex:1}} onClick={()=>p.go("plan")}>{p.t.startPlanning}</button>
           <button className="bb" style={{...btn,flex:1,background:"linear-gradient(135deg,#1d4ed8,#1e40af)",color:"#fff"}} onClick={()=>p.go("market")}>{p.t.liveMarkets}</button>
@@ -1248,11 +1296,11 @@ function DesktopScreens(p) {
           {icon:"📊",label:p.t.marketPrices,value:p.mandiLoading?"Fetching...":p.liveCount>0?p.t.liveCount(p.liveCount):p.hasMandiKey?"0 fetched":"Add API key",sub:p.lastUpdated?`${p.lastUpdated.toLocaleTimeString()}`:"data.gov.in",live:p.liveCount>0},
           {icon:"📅",label:p.t.seasonWidget,value:getSeasonLabel(),sub:"Auto-detected",live:true},
         ].map((s,i)=>(
-          <div key={i} style={{background:"#0a1628",borderRadius:14,padding:"16px 18px",border:"1px solid #1e293b"}}>
+          <div key={i} style={{background:"rgba(255,248,230,0.88)",borderRadius:14,padding:"16px 18px",border:"1.5px solid rgba(180,120,40,0.2)"}}>
             <div style={{fontSize:24}}>{s.icon}</div>
             <div style={{fontWeight:800,fontSize:16,marginTop:8}}>{s.value}</div>
-            <div style={{fontSize:11,color:"#475569",marginTop:3,display:"flex",alignItems:"center",gap:4}}>{s.label}<LiveTag live={s.live}/></div>
-            <div style={{fontSize:10,color:"#334155",marginTop:2}}>{s.sub}</div>
+            <div style={{fontSize:11,color:"#9a6030",marginTop:3,display:"flex",alignItems:"center",gap:4}}>{s.label}<LiveTag live={s.live}/></div>
+            <div style={{fontSize:10,color:"#b87040",marginTop:2}}>{s.sub}</div>
           </div>
         ))}
       </div>
@@ -1263,7 +1311,7 @@ function DesktopScreens(p) {
         <div key={i} className="hw" onClick={()=>p.go(item.t)} style={{...card,margin:0,cursor:"pointer"}}>
           <div style={{fontSize:28}}>{item.icon}</div>
           <div style={{fontWeight:700,fontSize:14,marginTop:10}}>{item.l}</div>
-          <div style={{color:"#475569",fontSize:12,marginTop:4}}>{item.s}</div>
+          <div style={{color:"#9a6030",fontSize:12,marginTop:4}}>{item.s}</div>
         </div>
       ))}
     </div>
@@ -1275,32 +1323,32 @@ function DesktopScreens(p) {
       <div style={lbl}>📍 {p.t.locationLabel}</div>
       <div style={{display:"flex",gap:10,marginBottom:12}}>
         <input style={{...inp,flex:1}} placeholder={p.t.locationPlaceholder} value={p.location} onChange={e=>p.setLocation(e.target.value)}/>
-        <button className="ob" style={{padding:"12px 20px",background:"#0f172a",border:"1px solid #4ade8044",borderRadius:12,fontSize:13,fontWeight:600,color:"#4ade80",cursor:"pointer",whiteSpace:"nowrap"}} onClick={p.detectLocation}>
+        <button className="ob" style={{padding:"12px 20px",background:"rgba(255,248,230,0.85)",border:"1px solid rgba(40,120,0,0.25)",borderRadius:12,fontSize:13,fontWeight:600,color:"#2a7a00",cursor:"pointer",whiteSpace:"nowrap"}} onClick={p.detectLocation}>
           {p.locating?<><span style={spin}>⟳</span> {p.t.locating}</>:p.t.locateBtn}
         </button>
       </div>
-      {p.locErr&&<div style={{fontSize:12,color:"#f87171",marginBottom:10}}>⚠️ {p.locErr}</div>}
-      {p.weatherLoading&&<div style={{padding:"12px",background:"#0a1628",borderRadius:10,fontSize:13,color:"#475569"}}>{p.t.fetchingWeather}</div>}
-      {p.weatherErr&&<div style={{fontSize:12,color:"#f87171"}}>{p.weatherErr}</div>}
+      {p.locErr&&<div style={{fontSize:12,color:"#cc2200",marginBottom:10}}>⚠️ {p.locErr}</div>}
+      {p.weatherLoading&&<div style={{padding:"12px",background:"rgba(255,248,230,0.7)",borderRadius:10,fontSize:13,color:"#9a6030"}}>{p.t.fetchingWeather}</div>}
+      {p.weatherErr&&<div style={{fontSize:12,color:"#cc2200"}}>{p.weatherErr}</div>}
       {p.weather&&(
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginTop:4}}>
           {[
-            {l:p.t.rainfallLevel,v:`${p.weather.rainfallMm}mm`,sub:`${p.weather.rainfallLevel} level`,c:"#4ade80"},
+            {l:p.t.rainfallLevel,v:`${p.weather.rainfallMm}mm`,sub:`${p.weather.rainfallLevel} level`,c:"#2a7a00"},
             {l:"Avg Temp",v:`${p.weather.avgTempC}°C`,sub:"30-day avg",c:"#f59e0b"},
-            {l:p.t.rainfallLevel,v:p.weather.rainfallLevel.toUpperCase(),sub:"Auto-set below",c:"#4ade80"},
+            {l:p.t.rainfallLevel,v:p.weather.rainfallLevel.toUpperCase(),sub:"Auto-set below",c:"#2a7a00"},
             {l:p.t.seasonLabel,v:p.season.toUpperCase(),sub:"Auto-detected",c:"#a78bfa"},
           ].map(m=>(
-            <div key={m.l+m.v} style={{background:"#052e16",borderRadius:10,padding:"12px 14px",border:"1px solid #166534"}}>
-              <div style={{fontSize:10,color:"#4ade8066",fontWeight:700,textTransform:"uppercase",marginBottom:4}}>{m.l}</div>
+            <div key={m.l+m.v} style={{background:"rgba(120,60,0,0.08)",borderRadius:10,padding:"12px 14px",border:"1px solid rgba(40,120,0,0.25)"}}>
+              <div style={{fontSize:10,color:"rgba(40,120,0,0.6)",fontWeight:700,textTransform:"uppercase",marginBottom:4}}>{m.l}</div>
               <div style={{fontSize:16,fontWeight:800,color:m.c}}>{m.v}</div>
-              <div style={{fontSize:10,color:"#475569",marginTop:2}}>{m.sub}</div>
+              <div style={{fontSize:10,color:"#9a6030",marginTop:2}}>{m.sub}</div>
             </div>
           ))}
         </div>
       )}
       {p.weather&&(
         <div style={{marginTop:12}}>
-          <div style={{fontSize:10,color:"#334155",marginBottom:4}}>{p.t.rainfallForecast}</div>
+          <div style={{fontSize:10,color:"#b87040",marginBottom:4}}>{p.t.rainfallForecast}</div>
           <RainBars data={p.weather.dailyRain}/>
         </div>
       )}
@@ -1312,7 +1360,7 @@ function DesktopScreens(p) {
 
       {/* Soil Type Tiles */}
       <div style={{marginBottom:20}}>
-        <div style={{fontSize:13,color:"#64748b",marginBottom:10,fontWeight:600}}>{p.t.soilType}</div>
+        <div style={{fontSize:13,color:"#7a5030",marginBottom:10,fontWeight:600}}>{p.t.soilType}</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}}>
           {[
             {val:"red",   emoji:"🟥", img:"🌄", desc:p.t.soilOptions.red},
@@ -1320,9 +1368,9 @@ function DesktopScreens(p) {
             {val:"sandy", emoji:"🟨", img:"🏜️", desc:p.t.soilOptions.sandy},
             {val:"loamy", emoji:"🟫", img:"🌿", desc:p.t.soilOptions.loamy},
           ].map(s=>(
-            <div key={s.val} onClick={()=>p.setSoil(s.val)} style={{padding:"14px 10px",borderRadius:14,border:`2px solid ${p.soil===s.val?"#4ade80":"#1e293b"}`,background:p.soil===s.val?"#052e16":"#0a1225",cursor:"pointer",textAlign:"center",transition:"all .15s"}}>
+            <div key={s.val} onClick={()=>p.setSoil(s.val)} style={{padding:"14px 10px",borderRadius:14,border:`2px solid ${p.soil===s.val?"#7a3a00":"rgba(180,120,40,0.2)"}`,background:p.soil===s.val?"rgba(120,60,0,0.1)":"rgba(255,248,230,0.7)",cursor:"pointer",textAlign:"center",transition:"all .15s"}}>
               <div style={{fontSize:28}}>{s.img}</div>
-              <div style={{fontSize:11,fontWeight:700,marginTop:6,color:p.soil===s.val?"#4ade80":"#94a3b8",lineHeight:1.3}}>{s.desc}</div>
+              <div style={{fontSize:11,fontWeight:700,marginTop:6,color:p.soil===s.val?"#7a3a00":"#9a6030",lineHeight:1.3}}>{s.desc}</div>
             </div>
           ))}
         </div>
@@ -1330,8 +1378,8 @@ function DesktopScreens(p) {
 
       {/* Rainfall Tiles */}
       <div style={{marginBottom:20}}>
-        <div style={{fontSize:13,color:"#64748b",marginBottom:10,fontWeight:600}}>
-          {p.t.rainfallLevel} {p.weather&&<span style={{fontSize:9,background:"#052e16",color:"#4ade80",borderRadius:4,padding:"1px 5px",fontWeight:700}}>🟢 AUTO</span>}
+        <div style={{fontSize:13,color:"#7a5030",marginBottom:10,fontWeight:600}}>
+          {p.t.rainfallLevel} {p.weather&&<span style={{fontSize:9,background:"rgba(40,120,0,0.1)",color:"#2a7a00",borderRadius:4,padding:"1px 5px",fontWeight:700}}>🟢 AUTO</span>}
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
           {[
@@ -1339,9 +1387,9 @@ function DesktopScreens(p) {
             {val:"medium", emoji:"🌦️", desc:p.t.rainfallOptions.medium},
             {val:"high",   emoji:"🌧️", desc:p.t.rainfallOptions.high},
           ].map(r=>(
-            <div key={r.val} onClick={()=>p.setRainfall(r.val)} style={{padding:"14px 10px",borderRadius:14,border:`2px solid ${p.rainfall===r.val?"#4ade80":"#1e293b"}`,background:p.rainfall===r.val?"#052e16":"#0a1225",cursor:"pointer",textAlign:"center",transition:"all .15s"}}>
+            <div key={r.val} onClick={()=>p.setRainfall(r.val)} style={{padding:"14px 10px",borderRadius:14,border:`2px solid ${p.rainfall===r.val?"#7a3a00":"rgba(180,120,40,0.2)"}`,background:p.rainfall===r.val?"rgba(120,60,0,0.1)":"rgba(255,248,230,0.7)",cursor:"pointer",textAlign:"center",transition:"all .15s"}}>
               <div style={{fontSize:32}}>{r.emoji}</div>
-              <div style={{fontSize:11,fontWeight:700,marginTop:6,color:p.rainfall===r.val?"#4ade80":"#94a3b8",lineHeight:1.3}}>{r.desc}</div>
+              <div style={{fontSize:11,fontWeight:700,marginTop:6,color:p.rainfall===r.val?"#7a3a00":"#9a6030",lineHeight:1.3}}>{r.desc}</div>
             </div>
           ))}
         </div>
@@ -1349,17 +1397,17 @@ function DesktopScreens(p) {
 
       {/* Season Tiles */}
       <div>
-        <div style={{fontSize:13,color:"#64748b",marginBottom:10,fontWeight:600}}>
-          {p.t.seasonLabel} <span style={{fontSize:9,background:"#052e16",color:"#4ade80",borderRadius:4,padding:"1px 5px",fontWeight:700}}>🟢 AUTO</span>
+        <div style={{fontSize:13,color:"#7a5030",marginBottom:10,fontWeight:600}}>
+          {p.t.seasonLabel} <span style={{fontSize:9,background:"rgba(40,120,0,0.1)",color:"#2a7a00",borderRadius:4,padding:"1px 5px",fontWeight:700}}>🟢 AUTO</span>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
           {[
             {val:"kharif", emoji:"🌱", desc:p.t.seasonOptions.kharif},
             {val:"rabi",   emoji:"❄️", desc:p.t.seasonOptions.rabi},
           ].map(s=>(
-            <div key={s.val} onClick={()=>p.setSeason(s.val)} style={{padding:"14px 10px",borderRadius:14,border:`2px solid ${p.season===s.val?"#4ade80":"#1e293b"}`,background:p.season===s.val?"#052e16":"#0a1225",cursor:"pointer",textAlign:"center",transition:"all .15s"}}>
+            <div key={s.val} onClick={()=>p.setSeason(s.val)} style={{padding:"14px 10px",borderRadius:14,border:`2px solid ${p.season===s.val?"#7a3a00":"rgba(180,120,40,0.2)"}`,background:p.season===s.val?"rgba(120,60,0,0.1)":"rgba(255,248,230,0.7)",cursor:"pointer",textAlign:"center",transition:"all .15s"}}>
               <div style={{fontSize:32}}>{s.emoji}</div>
-              <div style={{fontSize:12,fontWeight:700,marginTop:6,color:p.season===s.val?"#4ade80":"#94a3b8"}}>{s.desc}</div>
+              <div style={{fontSize:12,fontWeight:700,marginTop:6,color:p.season===s.val?"#7a3a00":"#9a6030"}}>{s.desc}</div>
             </div>
           ))}
         </div>
@@ -1369,10 +1417,10 @@ function DesktopScreens(p) {
     {/* Voice */}
     <div style={card}>
       <div style={lbl}>{p.t.voiceTitle}</div>
-      <button className="bb" style={{...btn,background:p.listening?"linear-gradient(135deg,#ef4444,#dc2626)":"linear-gradient(135deg,#1d4ed8,#1e40af)",color:"#fff"}} onClick={p.startVoice}>
+      <button className="bb" style={{...btn,background:p.listening?"linear-gradient(135deg,#cc2200,#991100)":"linear-gradient(135deg,#4a2200,#7a4010)",color:"#fff8ee"}} onClick={p.startVoice}>
         {p.listening?p.t.voiceListening:p.t.voiceBtn}
       </button>
-      {p.voiceText&&<div style={{marginTop:10,padding:"10px 14px",background:"#0a1628",borderRadius:10,fontSize:13,color:"#94a3b8",fontStyle:"italic"}}>Heard: "{p.voiceText}"</div>}
+      {p.voiceText&&<div style={{marginTop:10,padding:"10px 14px",background:"rgba(255,248,230,0.7)",borderRadius:10,fontSize:13,color:"#9a6030",fontStyle:"italic"}}>Heard: "{p.voiceText}"</div>}
     </div>
 
     <button className="bb" style={{...btn,opacity:(!p.soil||!p.rainfall||!p.season)?0.5:1}} onClick={p.getRecommendations} disabled={p.loading||!p.soil||!p.rainfall||!p.season}>
@@ -1384,12 +1432,12 @@ function DesktopScreens(p) {
       <div style={{marginTop:24}}>
         <div style={{...lbl,marginBottom:16}}>
           {p.t.topPicks} · {p.soil} soil · {p.rainfall} rain · {p.season}
-          {p.weather&&<span style={{marginLeft:10,fontSize:10,background:"#052e16",color:"#4ade80",borderRadius:6,padding:"2px 8px"}}>Weather: {p.weather.rainfallMm}mm · {p.weather.avgTempC}°C</span>}
+          {p.weather&&<span style={{marginLeft:10,fontSize:10,background:"rgba(120,60,0,0.08)",color:"#2a7a00",borderRadius:6,padding:"2px 8px"}}>Weather: {p.weather.rainfallMm}mm · {p.weather.avgTempC}°C</span>}
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:18}}>
           {p.results.map((crop,i)=>(
-            <div key={crop.name} className="hw" onClick={()=>p.setExpanded(p.expanded===crop.name?null:crop.name)} style={{background:i===0?"linear-gradient(135deg,#052e16,#0a2010)":"linear-gradient(145deg,#0f172a,#0a1628)",border:`1px solid ${i===0?"#166534":"#1e293b"}`,borderRadius:18,padding:"22px",cursor:"pointer"}}>
-              {i===0&&<div style={{fontSize:10,background:"#854d0e",color:"#fbbf24",borderRadius:6,padding:"2px 8px",fontWeight:700,marginBottom:8,display:"inline-block"}}>{p.t.topPick}</div>}
+            <div key={crop.name} className="hw" onClick={()=>p.setExpanded(p.expanded===crop.name?null:crop.name)} style={{background:i===0?"linear-gradient(135deg,rgba(40,120,0,0.08),rgba(255,248,230,0.7))":"rgba(255,252,242,0.88)",border:`1.5px solid ${i===0?"rgba(40,120,0,0.3)":"rgba(180,120,40,0.2)"}`,borderRadius:18,padding:"22px",cursor:"pointer"}}>
+              {i===0&&<div style={{fontSize:10,background:"rgba(180,80,0,0.12)",color:"#b85c00",borderRadius:6,padding:"2px 8px",fontWeight:700,marginBottom:8,display:"inline-block"}}>{p.t.topPick}</div>}
               <div style={{fontSize:32}}>{crop.icon}</div>
               <div style={{fontWeight:800,fontSize:18,marginTop:8}}>{crop.name}</div>
               <div style={{marginTop:8,display:"flex",alignItems:"center",flexWrap:"wrap",gap:6}}>
@@ -1397,16 +1445,16 @@ function DesktopScreens(p) {
                 <LiveTag live={crop.isLive}/>
               </div>
               <div style={{marginTop:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <span style={{fontSize:12,color:"#64748b"}}>{p.t.mandiPrice}</span>
-                <span style={{fontWeight:800,color:"#4ade80",fontSize:15}}>₹{crop.price.toLocaleString()}/q</span>
+                <span style={{fontSize:12,color:"#7a5030"}}>{p.t.mandiPrice}</span>
+                <span style={{fontWeight:800,color:"#2a7a00",fontSize:15}}>₹{crop.price.toLocaleString()}/q</span>
               </div>
               <RiskMeter value={crop.risk} lang={p.lang} showWarning={true}/>
               {p.expanded===crop.name&&(
-                <div style={{marginTop:14,paddingTop:14,borderTop:"1px solid #1e293b"}}>
+                <div style={{marginTop:14,paddingTop:14,borderTop:"1.5px solid rgba(180,120,40,0.2)"}}>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
                     {[{l:p.t.mandiPrice,v:`₹${crop.price.toLocaleString()}/q`},{l:p.t.yieldAcre,v:`${crop.yieldPerAcre} q`},{l:p.t.incomeAcre,v:`₹${(crop.price*crop.yieldPerAcre).toLocaleString()}`},{l:p.t.risk,v:`${crop.risk}%`}].map(m=>(
-                      <div key={m.l} style={{background:"#0a1628",borderRadius:10,padding:"10px",textAlign:"center"}}>
-                        <div style={{fontSize:10,color:"#475569",marginBottom:3}}>{m.l}</div>
+                      <div key={m.l} style={{background:"rgba(255,248,230,0.7)",borderRadius:10,padding:"10px",textAlign:"center"}}>
+                        <div style={{fontSize:10,color:"#9a6030",marginBottom:3}}>{m.l}</div>
                         <div style={{fontWeight:700,fontSize:13}}>{m.v}</div>
                       </div>
                     ))}
@@ -1425,17 +1473,17 @@ function DesktopScreens(p) {
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
       <div>
         <div style={lbl}>{p.t.mandiIntelligence}</div>
-        <div style={{fontSize:13,color:"#475569"}}>
+        <div style={{fontSize:13,color:"#9a6030"}}>
           {p.liveCount>0?p.t.liveCount(p.liveCount):p.t.estimated}
           {p.lastUpdated&&` · ${p.t.pricesUpdated} ${p.lastUpdated.toLocaleTimeString()}`}
         </div>
       </div>
-      <button className="ob" onClick={()=>p.refreshMandiPrices()} style={{padding:"10px 18px",background:"transparent",border:"1px solid #1e293b",borderRadius:10,color:"#64748b",cursor:"pointer",fontSize:13,fontWeight:600}}>
+      <button className="ob" onClick={()=>p.refreshMandiPrices()} style={{padding:"10px 18px",background:"transparent",border:"1.5px solid rgba(180,120,40,0.2)",borderRadius:10,color:"#7a5030",cursor:"pointer",fontSize:13,fontWeight:600}}>
         {p.mandiLoading?<span style={spin}>⟳</span>:p.t.refreshBtn}
       </button>
     </div>
     {p.mandiErr==="no_key"&&(
-      <div style={{background:"#1c1a05",border:"1px solid #854d0e",borderRadius:14,padding:"14px 18px",marginBottom:16,fontSize:13,color:"#fbbf24"}}>
+      <div style={{background:"rgba(180,100,0,0.07)",border:"1px solid rgba(180,80,0,0.2)",borderRadius:14,padding:"14px 18px",marginBottom:16,fontSize:13,color:"#b85c00"}}>
         {p.t.noKeyMsg}
       </div>
     )}
@@ -1444,14 +1492,14 @@ function DesktopScreens(p) {
         const live=p.mandiPrices[name];
         const price=live||data.fallbackPrice;
         return(
-          <div key={name} className="hw" style={{background:"linear-gradient(145deg,#0f172a,#0a1628)",border:"1px solid #1e293b",borderRadius:18,padding:"20px",cursor:"pointer"}} onClick={()=>p.setExpanded(p.expanded===name?null:name)}>
+          <div key={name} className="hw" style={{background:"rgba(255,252,242,0.88)",border:"1.5px solid rgba(180,120,40,0.2)",borderRadius:18,padding:"20px",cursor:"pointer"}} onClick={()=>p.setExpanded(p.expanded===name?null:name)}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
               <div style={{display:"flex",alignItems:"center",gap:10}}>
                 <span style={{fontSize:26}}>{data.icon}</span>
                 <div>
                   <div style={{fontWeight:700,fontSize:15}}>{name}</div>
                   <div style={{fontSize:12,display:"flex",alignItems:"center"}}>
-                    <span style={{color:live?"#4ade80":"#fbbf24",fontWeight:700}}>₹{price.toLocaleString()}/q</span>
+                    <span style={{color:live?"#2a7a00":"#b85c00",fontWeight:700}}>₹{price.toLocaleString()}/q</span>
                     <LiveTag live={!!live}/>
                   </div>
                 </div>
@@ -1470,19 +1518,19 @@ function DesktopScreens(p) {
         <div style={card}>
           <div style={lbl}>💰 {p.t.profitSimTitle}</div>
           <div style={{marginBottom:16}}>
-            <div style={{fontSize:12,color:"#64748b",marginBottom:6}}>{p.t.selectCrop} (🟢 = live price)</div>
+            <div style={{fontSize:12,color:"#7a5030",marginBottom:6}}>{p.t.selectCrop} (🟢 = live price)</div>
             <select style={sel} value={p.profitCrop} onChange={e=>p.setProfitCrop(e.target.value)}>
               {Object.keys(CROP_META).map(c=><option key={c} value={c}>{CROP_META[c].icon} {c}{p.isLive(c)?" 🟢":""}</option>)}
             </select>
           </div>
           <div style={{marginBottom:16}}>
-            <div style={{fontSize:12,color:"#64748b",marginBottom:6}}>{p.t.landArea}: <strong style={{color:"#e2e8f0"}}>{p.area} {p.t.acres}</strong></div>
-            <input type="range" min="0.5" max="20" step="0.5" value={p.area} onChange={e=>p.setArea(Number(e.target.value))} style={{width:"100%",accentColor:"#4ade80",cursor:"pointer"}}/>
-            <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"#334155",marginTop:4}}><span>0.5</span><span>20 {p.t.acres}</span></div>
+            <div style={{fontSize:12,color:"#7a5030",marginBottom:6}}>{p.t.landArea}: <strong style={{color:"#3a1f00"}}>{p.area} {p.t.acres}</strong></div>
+            <input type="range" min="0.5" max="20" step="0.5" value={p.area} onChange={e=>p.setArea(Number(e.target.value))} style={{width:"100%",accentColor:"#7a3a00",cursor:"pointer"}}/>
+            <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"#b87040",marginTop:4}}><span>0.5</span><span>20 {p.t.acres}</span></div>
           </div>
           {/* Cost input */}
           <div>
-            <div style={{fontSize:12,color:"#64748b",marginBottom:6}}>{p.t.costPerAcre}</div>
+            <div style={{fontSize:12,color:"#7a5030",marginBottom:6}}>{p.t.costPerAcre}</div>
             <input
               type="number" min="0" step="500"
               value={p.costPerAcre}
@@ -1490,25 +1538,25 @@ function DesktopScreens(p) {
               placeholder={p.t.costPlaceholder}
               style={{...inp,width:"100%"}}
             />
-            <div style={{fontSize:11,color:"#334155",marginTop:4}}>{p.t.costNote}</div>
+            <div style={{fontSize:11,color:"#b87040",marginTop:4}}>{p.t.costNote}</div>
           </div>
         </div>
         <div style={card}>
           <div style={lbl}>⚡ {p.t.quickCompare} ({p.area} ac)</div>
           {["Groundnut","Sesame","Chickpea","Moong"].map(c=>(
-            <div key={c} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:"1px solid #0f172a"}}>
+            <div key={c} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:"1px solid rgba(180,120,40,0.12)"}}>
               <div style={{display:"flex",gap:8,alignItems:"center"}}>
                 <span>{CROP_META[c].icon}</span>
                 <span style={{fontWeight:600,fontSize:13}}>{c}</span>
                 <LiveTag live={p.isLive(c)}/>
               </div>
-              <div style={{fontWeight:700,fontSize:14,color:"#4ade80"}}>₹{(p.area*CROP_META[c].yieldPerAcre*p.getPrice(c)).toLocaleString("en-IN")}</div>
+              <div style={{fontWeight:700,fontSize:14,color:"#2a7a00"}}>₹{(p.area*CROP_META[c].yieldPerAcre*p.getPrice(c)).toLocaleString("en-IN")}</div>
             </div>
           ))}
         </div>
       </div>
       {p.profitMeta&&(
-        <div style={{background:"linear-gradient(135deg,#052e16,#0a1628)",border:"1px solid #14532d",borderRadius:20,padding:"28px"}}>
+        <div style={{background:"rgba(255,252,242,0.95)",border:"1.5px solid rgba(40,120,0,0.2)",borderRadius:20,padding:"28px"}}>
           <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:20}}>
             <span style={{fontSize:44}}>{p.profitMeta.icon}</span>
             <div>
@@ -1526,36 +1574,36 @@ function DesktopScreens(p) {
               {l:"Total Yield",v:`${(p.area*p.profitMeta.yieldPerAcre).toFixed(1)} q`},
               {l:p.t.risk,v:`${p.profitMeta.risk}%`},
             ].map(m=>(
-              <div key={m.l} style={{background:"#0a2010",borderRadius:12,padding:"14px 16px"}}>
-                <div style={{fontSize:11,color:"#4ade8099",marginBottom:4,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.08em"}}>{m.l}{m.live&&<span style={{marginLeft:4,fontSize:9,color:"#4ade80"}}>● LIVE</span>}</div>
+              <div key={m.l} style={{background:"rgba(40,120,0,0.06)",borderRadius:12,padding:"14px 16px"}}>
+                <div style={{fontSize:11,color:"rgba(40,120,0,0.7)",marginBottom:4,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.08em"}}>{m.l}{m.live&&<span style={{marginLeft:4,fontSize:9,color:"#2a7a00"}}>● LIVE</span>}</div>
                 <div style={{fontWeight:800,fontSize:16}}>{m.v}</div>
               </div>
             ))}
           </div>
 
           {/* Gross Income */}
-          <div style={{background:"#0a2010",border:"1px solid #166534",borderRadius:14,padding:"20px",textAlign:"center",marginBottom:12}}>
-            <div style={{fontSize:11,color:"#4ade8099",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:6}}>
-              {p.t.grossIncome} {p.isLive(p.profitCrop)&&<span style={{fontSize:9,background:"#166534",padding:"2px 6px",borderRadius:4,marginLeft:6}}>🟢 {p.t.livePrice}</span>}
+          <div style={{background:"rgba(40,120,0,0.08)",border:"1px solid rgba(40,120,0,0.25)",borderRadius:14,padding:"20px",textAlign:"center",marginBottom:12}}>
+            <div style={{fontSize:11,color:"rgba(40,120,0,0.7)",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:6}}>
+              {p.t.grossIncome} {p.isLive(p.profitCrop)&&<span style={{fontSize:9,background:"rgba(40,120,0,0.15)",padding:"2px 6px",borderRadius:4,marginLeft:6}}>🟢 {p.t.livePrice}</span>}
             </div>
-            <div style={{fontSize:32,fontWeight:900,color:"#4ade80",letterSpacing:"-1px"}}>₹{p.profitEstimate}</div>
-            <div style={{fontSize:12,color:"#166534",marginTop:4}}>{p.area} {p.t.acres} · {p.profitCrop}</div>
+            <div style={{fontSize:32,fontWeight:900,color:"#2a7a00",letterSpacing:"-1px"}}>₹{p.profitEstimate}</div>
+            <div style={{fontSize:12,color:"#2a7a00",marginTop:4}}>{p.area} {p.t.acres} · {p.profitCrop}</div>
           </div>
 
           {/* Cost row */}
-          <div style={{background:"#1c0505",border:"1px solid #7f1d1d",borderRadius:14,padding:"16px 20px",textAlign:"center",marginBottom:12}}>
-            <div style={{fontSize:11,color:"#f8717199",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:4}}>{p.t.totalCost}</div>
-            <div style={{fontSize:24,fontWeight:800,color:"#f87171"}}>− ₹{p.totalCost.toLocaleString("en-IN")}</div>
-            <div style={{fontSize:11,color:"#7f1d1d",marginTop:4}}>₹{p.costPerAcre.toLocaleString()} × {p.area} {p.t.acres}</div>
+          <div style={{background:"rgba(180,0,0,0.07)",border:"1px solid rgba(180,0,0,0.2)",borderRadius:14,padding:"16px 20px",textAlign:"center",marginBottom:12}}>
+            <div style={{fontSize:11,color:"rgba(180,0,0,0.6)",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:4}}>{p.t.totalCost}</div>
+            <div style={{fontSize:24,fontWeight:800,color:"#cc2200"}}>− ₹{p.totalCost.toLocaleString("en-IN")}</div>
+            <div style={{fontSize:11,color:"#cc2200",marginTop:4}}>₹{p.costPerAcre.toLocaleString()} × {p.area} {p.t.acres}</div>
           </div>
 
           {/* Net Profit */}
-          <div style={{background:p.netProfitAmt>=0?"#052e16":"#1c0505",border:`1px solid ${p.netProfitAmt>=0?"#166534":"#7f1d1d"}`,borderRadius:14,padding:"20px",textAlign:"center"}}>
-            <div style={{fontSize:11,color:p.netProfitAmt>=0?"#4ade8099":"#f8717199",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:6}}>{p.t.netProfit}</div>
-            <div style={{fontSize:38,fontWeight:900,color:p.netProfitAmt>=0?"#4ade80":"#f87171",letterSpacing:"-1px"}}>
+          <div style={{background:p.netProfitAmt>=0?"rgba(40,120,0,0.08)":"rgba(180,0,0,0.07)",border:`1.5px solid ${p.netProfitAmt>=0?"rgba(40,120,0,0.25)":"rgba(180,0,0,0.2)"}`,borderRadius:14,padding:"20px",textAlign:"center"}}>
+            <div style={{fontSize:11,color:p.netProfitAmt>=0?"rgba(40,120,0,0.7)":"rgba(180,0,0,0.6)",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:6}}>{p.t.netProfit}</div>
+            <div style={{fontSize:38,fontWeight:900,color:p.netProfitAmt>=0?"#2a7a00":"#cc2200",letterSpacing:"-1px"}}>
               {p.netProfitAmt>=0?"":"−"}₹{Math.abs(p.netProfitAmt).toLocaleString("en-IN")}
             </div>
-            <div style={{fontSize:12,color:p.netProfitAmt>=0?"#166534":"#7f1d1d",marginTop:6}}>{p.t.netProfitTitle}</div>
+            <div style={{fontSize:12,color:p.netProfitAmt>=0?"#2a7a00":"#cc2200",marginTop:6}}>{p.t.netProfitTitle}</div>
           </div>
           <div style={{marginTop:16}}><RiskMeter value={p.profitMeta.risk} lang={p.lang}/></div>
         </div>
@@ -1566,28 +1614,28 @@ function DesktopScreens(p) {
   if (p.screen==="alerts") return(<>
     <div style={{marginBottom:20}}>
       <div style={lbl}>{p.t.alertsTitle}</div>
-      <div style={{fontSize:13,color:"#475569"}}>{p.t.alertsDesc}</div>
+      <div style={{fontSize:13,color:"#9a6030"}}>{p.t.alertsDesc}</div>
     </div>
     <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:18,marginBottom:24}}>
       {[{crop:"Tomato",risk:72,reason:{en:"Many farmers in Karnataka & Maharashtra are growing this — prices may fall at harvest time.",hi:"कर्नाटक और महाराष्ट्र में बहुत किसान उगा रहे हैं — कटाई पर भाव गिर सकता है।",kn:"ಕರ್ನಾಟಕ ಮತ್ತು ಮಹಾರಾಷ್ಟ್ರದಲ್ಲಿ ಅನೇಕ ರೈತರು ಬೆಳೆಯುತ್ತಿದ್ದಾರೆ — ಕೊಯ್ಲಿನ ಸಮಯದಲ್ಲಿ ಬೆಲೆ ಕಡಿಮೆಯಾಗಬಹುದು."},alt:"Capsicum",altRisk:31},{crop:"Onion",risk:68,reason:{en:"A big harvest is expected across South India this season — market may be flooded.",hi:"इस मौसम दक्षिण भारत में भारी फसल आने की उम्मीद — बाज़ार में ज़्यादा माल आ सकता है।",kn:"ಈ ಸಾಲಿನಲ್ಲಿ ದಕ್ಷಿಣ ಭಾರತದಲ್ಲಿ ದೊಡ್ಡ ಫಸಲು ನಿರೀಕ್ಷಿತ — ಮಾರುಕಟ್ಟೆ ತುಂಬಿ ಹೋಗಬಹುದು."},alt:"Garlic",altRisk:38},{crop:"Potato",risk:48,reason:{en:"Cold storage in UP & MP is full — extra supply is pushing prices down.",hi:"UP और MP में कोल्ड स्टोरेज भरा है — अतिरिक्त माल से भाव दब रहे हैं।",kn:"UP ಮತ್ತು MP ನಲ್ಲಿ ಶೀತಲ ಸಂಗ್ರಹ ತುಂಬಿದೆ — ಹೆಚ್ಚು ಸಂಗ್ರಹದಿಂದ ಬೆಲೆ ಕಡಿಮೆಯಾಗುತ್ತಿದೆ."},alt:"Chickpea",altRisk:19}].map((a,i)=>(
-        <div key={i} style={{background:"linear-gradient(135deg,#100a02,#0a1628)",border:"1px solid #854d0e",borderRadius:18,padding:"22px"}}>
+        <div key={i} style={{background:"rgba(255,240,210,0.9)",border:"1.5px solid rgba(180,80,0,0.25)",borderRadius:18,padding:"22px"}}>
           <div style={{display:"flex",justifyContent:"space-between",marginBottom:12}}>
             <span style={{fontWeight:800,fontSize:16}}>{CROP_META[a.crop]?.icon} {a.crop}</span>
-            <span style={{fontSize:10,background:"#78350f",color:"#fbbf24",borderRadius:6,padding:"3px 8px",fontWeight:700}}>{p.t.riskBadge}</span>
+            <span style={{fontSize:10,background:"rgba(180,80,0,0.15)",color:"#b85c00",borderRadius:6,padding:"3px 8px",fontWeight:700}}>{p.t.riskBadge}</span>
           </div>
           <RiskMeter value={a.risk} lang={p.lang}/>
-          <div style={{marginTop:12,padding:"10px 12px",background:"#0a1628",borderRadius:10}}>
-            <div style={{fontSize:11,color:"#94a3b8",marginBottom:4}}>{p.t.alertReason}</div>
-            <div style={{fontSize:13,color:"#e2e8f0",lineHeight:1.6}}>{a.reason[p.lang]||a.reason.en}</div>
+          <div style={{marginTop:12,padding:"10px 12px",background:"rgba(255,248,230,0.7)",borderRadius:10}}>
+            <div style={{fontSize:11,color:"#9a6030",marginBottom:4}}>{p.t.alertReason}</div>
+            <div style={{fontSize:13,color:"#3a1f00",lineHeight:1.6}}>{a.reason[p.lang]||a.reason.en}</div>
           </div>
-          <div style={{marginTop:12,padding:"10px 12px",background:"#052e16",borderRadius:10,border:"1px solid #166534"}}>
-            <div style={{fontSize:11,color:"#4ade80",marginBottom:4}}>{p.t.alertSwitch}</div>
+          <div style={{marginTop:12,padding:"10px 12px",background:"rgba(255,248,230,0.88)",borderRadius:10,border:"1.5px solid rgba(180,120,40,0.2)"}}>
+            <div style={{fontSize:11,color:"#2a7a00",marginBottom:4}}>{p.t.alertSwitch}</div>
             <div style={{fontWeight:700,fontSize:14}}>{CROP_META[a.alt]?.icon} {a.alt}{p.isLive(a.alt)&&" 🟢"}</div>
           </div>
         </div>
       ))}
     </div>
-    <div style={card}><div style={lbl}>{p.t.roadmap}</div><div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>{["🗣️ Kannada & Hindi voice","🛰️ Satellite monitoring","🏛️ Govt scheme integration","📦 Farmer marketplace","🤖 AI yield prediction","📡 Real-time weather alerts"].map((f,i)=>(<div key={i} style={{background:"#0a1628",borderRadius:12,padding:"14px",fontSize:13,color:"#475569"}}>{f}</div>))}</div></div>
+    <div style={card}><div style={lbl}>{p.t.roadmap}</div><div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>{["🗣️ Kannada & Hindi voice","🛰️ Satellite monitoring","🏛️ Govt scheme integration","📦 Farmer marketplace","🤖 AI yield prediction","📡 Real-time weather alerts"].map((f,i)=>(<div key={i} style={{background:"rgba(255,248,230,0.7)",borderRadius:12,padding:"14px",fontSize:13,color:"#9a6030"}}>{f}</div>))}</div></div>
   </>);
   return null;
 }
@@ -1596,23 +1644,23 @@ function DesktopScreens(p) {
 // MOBILE SCREENS
 // ══════════════════════════════════════════════════════════════════
 function MobileScreens(p) {
-  const card={background:"linear-gradient(145deg,#0f172a,#0a1628)",border:"1px solid #1e293b",borderRadius:20,padding:"18px 20px",margin:"0 14px 12px"};
-  const lbl={fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.12em",color:"#4ade80",marginBottom:10};
-  const sel={width:"100%",padding:"11px 14px",background:"#0a1225",border:"1px solid #1e293b",borderRadius:12,color:"#e2e8f0",fontSize:14,outline:"none",appearance:"none",cursor:"pointer",marginTop:4};
-  const inp={width:"100%",padding:"11px 14px",background:"#0a1225",border:"1px solid #1e293b",borderRadius:12,color:"#e2e8f0",fontSize:14,outline:"none"};
-  const btn={width:"100%",padding:"14px",background:"linear-gradient(135deg,#4ade80,#22c55e)",border:"none",borderRadius:16,fontSize:14,fontWeight:800,color:"#020c18",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8};
+  const card={background:"rgba(255,252,242,0.88)",border:"1.5px solid rgba(180,120,40,0.2)",borderRadius:20,padding:"18px 20px",margin:"0 14px 12px",boxShadow:"0 4px 16px rgba(120,60,0,0.08)",backdropFilter:"blur(8px)"};
+  const lbl={fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.12em",color:"#b85c00",marginBottom:10};
+  const sel={width:"100%",padding:"11px 14px",background:"rgba(255,248,230,0.92)",border:"1.5px solid rgba(120,80,20,0.25)",borderRadius:12,color:"#3a1f00",fontSize:14,outline:"none",appearance:"none",cursor:"pointer",marginTop:4};
+  const inp={width:"100%",padding:"11px 14px",background:"rgba(255,248,230,0.92)",border:"1.5px solid rgba(120,80,20,0.25)",borderRadius:12,color:"#3a1f00",fontSize:14,outline:"none"};
+  const btn={width:"100%",padding:"14px",background:"linear-gradient(135deg,#7a3a00,#b85c00,#d47020)",border:"none",borderRadius:16,fontSize:14,fontWeight:800,color:"#fff8e8",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:"0 4px 16px rgba(140,60,0,0.3)"};
   const spin={animation:"spin 1s linear infinite",display:"inline-block"};
 
   if (p.screen==="home") return(<>
-    <div style={{background:"linear-gradient(135deg,#052e16,#0a1628,#1a1028)",border:"1px solid #14532d",borderRadius:24,padding:"26px 20px",margin:"0 14px 14px"}}>
-      <div style={{fontSize:11,color:"#4ade80",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:10}}>🌾 {getSeasonLabel()}</div>
-      <div style={{fontSize:30,fontWeight:900,letterSpacing:"-1px",lineHeight:1.1}}>{p.t.growSmarter}<br/><span style={{color:"#4ade80"}}>{p.t.earnBetter}</span></div>
+    <div style={{background:"linear-gradient(135deg,rgba(120,60,0,0.08),rgba(255,248,230,0.6))",border:"1px solid rgba(40,100,0,0.2)",borderRadius:24,padding:"26px 20px",margin:"0 14px 14px"}}>
+      <div style={{fontSize:11,color:"#2a7a00",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:10}}>🌾 {getSeasonLabel()}</div>
+      <div style={{fontSize:30,fontWeight:900,letterSpacing:"-1px",lineHeight:1.1}}>{p.t.growSmarter}<br/><span style={{color:"#2a7a00"}}>{p.t.earnBetter}</span></div>
       {p.weather&&<div style={{marginTop:10,display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-        <div style={{background:"#052e16",borderRadius:10,padding:"8px 10px",border:"1px solid #166534"}}>
-          <div style={{fontSize:9,color:"#4ade8066",fontWeight:700,textTransform:"uppercase"}}>🌧 {p.t.rainfallLevel}</div>
-          <div style={{fontSize:16,fontWeight:800,color:"#4ade80"}}>{p.weather.rainfallMm}mm <span style={{fontSize:10}}>{p.weather.rainfallLevel}</span></div>
+        <div style={{background:"rgba(120,60,0,0.08)",borderRadius:10,padding:"8px 10px",border:"1px solid rgba(40,120,0,0.25)"}}>
+          <div style={{fontSize:9,color:"rgba(40,120,0,0.6)",fontWeight:700,textTransform:"uppercase"}}>🌧 {p.t.rainfallLevel}</div>
+          <div style={{fontSize:16,fontWeight:800,color:"#2a7a00"}}>{p.weather.rainfallMm}mm <span style={{fontSize:10}}>{p.weather.rainfallLevel}</span></div>
         </div>
-        <div style={{background:"#052e16",borderRadius:10,padding:"8px 10px",border:"1px solid #166634"}}>
+        <div style={{background:"rgba(120,60,0,0.08)",borderRadius:10,padding:"8px 10px",border:"1px solid #166634"}}>
           <div style={{fontSize:9,color:"#f59e0b66",fontWeight:700,textTransform:"uppercase"}}>🌡 Temp</div>
           <div style={{fontSize:16,fontWeight:800,color:"#f59e0b"}}>{p.weather.avgTempC}°C <span style={{fontSize:10}}>avg</span></div>
         </div>
@@ -1624,7 +1672,7 @@ function MobileScreens(p) {
         <div key={i} onClick={()=>p.go(item.t)} style={{...card,margin:0,cursor:"pointer"}}>
           <div style={{fontSize:22}}>{item.icon}</div>
           <div style={{fontWeight:700,fontSize:13,marginTop:8}}>{item.l}</div>
-          <div style={{color:"#475569",fontSize:11,marginTop:3}}>{item.s}</div>
+          <div style={{color:"#9a6030",fontSize:11,marginTop:3}}>{item.s}</div>
         </div>
       ))}
     </div>
@@ -1635,13 +1683,13 @@ function MobileScreens(p) {
       <div style={lbl}>📍 {p.t.locationLabel}</div>
       <div style={{display:"flex",gap:8}}>
         <input style={{...inp,flex:1}} placeholder={p.t.locationPlaceholder} value={p.location} onChange={e=>p.setLocation(e.target.value)}/>
-        <button style={{padding:"11px 13px",background:"#0f172a",border:"1px solid #4ade8044",borderRadius:12,fontSize:12,fontWeight:600,color:"#4ade80",cursor:"pointer",whiteSpace:"nowrap"}} onClick={p.detectLocation}>
+        <button style={{padding:"11px 13px",background:"rgba(255,248,230,0.85)",border:"1px solid rgba(40,120,0,0.25)",borderRadius:12,fontSize:12,fontWeight:600,color:"#2a7a00",cursor:"pointer",whiteSpace:"nowrap"}} onClick={p.detectLocation}>
           {p.locating?<span style={spin}>⟳</span>:"📍"}
         </button>
       </div>
-      {p.locErr&&<div style={{marginTop:6,fontSize:11,color:"#f87171"}}>⚠️ {p.locErr}</div>}
-      {p.weatherLoading&&<div style={{marginTop:8,fontSize:12,color:"#475569"}}>{p.t.fetchingWeather}</div>}
-      {p.weather&&<div style={{marginTop:10,padding:"10px",background:"#052e16",borderRadius:10,border:"1px solid #166534",fontSize:12,color:"#4ade80"}}>{p.t.liveWeatherBadge(p.weather.rainfallMm,p.weather.avgTempC,p.weather.rainfallLevel)}</div>}
+      {p.locErr&&<div style={{marginTop:6,fontSize:11,color:"#cc2200"}}>⚠️ {p.locErr}</div>}
+      {p.weatherLoading&&<div style={{marginTop:8,fontSize:12,color:"#9a6030"}}>{p.t.fetchingWeather}</div>}
+      {p.weather&&<div style={{marginTop:10,padding:"10px",background:"rgba(255,248,230,0.88)",borderRadius:10,border:"1.5px solid rgba(180,120,40,0.2)",fontSize:12,color:"#2a7a00"}}>{`🌦 ${p.weather.rainfallMm}mm · ${p.weather.avgTempC}°C · ${p.weather.rainfallLevel}`}</div>}
     </div>
 
     {/* Farm details — Visual Tiles */}
@@ -1650,7 +1698,7 @@ function MobileScreens(p) {
 
       {/* Soil tiles */}
       <div style={{marginBottom:16}}>
-        <div style={{fontSize:12,color:"#64748b",marginBottom:8,fontWeight:600}}>{p.t.soilType}</div>
+        <div style={{fontSize:12,color:"#7a5030",marginBottom:8,fontWeight:600}}>{p.t.soilType}</div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
           {[
             {val:"red",   img:"🌄", desc:p.t.soilOptions.red},
@@ -1658,9 +1706,9 @@ function MobileScreens(p) {
             {val:"sandy", img:"🏜️", desc:p.t.soilOptions.sandy},
             {val:"loamy", img:"🌿", desc:p.t.soilOptions.loamy},
           ].map(s=>(
-            <div key={s.val} onClick={()=>p.setSoil(s.val)} style={{padding:"12px 8px",borderRadius:12,border:`2px solid ${p.soil===s.val?"#4ade80":"#1e293b"}`,background:p.soil===s.val?"#052e16":"#0a1225",cursor:"pointer",textAlign:"center",transition:"all .15s"}}>
+            <div key={s.val} onClick={()=>p.setSoil(s.val)} style={{padding:"12px 8px",borderRadius:12,border:`2px solid ${p.soil===s.val?"#7a3a00":"rgba(180,120,40,0.2)"}`,background:p.soil===s.val?"rgba(120,60,0,0.1)":"rgba(255,248,230,0.7)",cursor:"pointer",textAlign:"center",transition:"all .15s"}}>
               <div style={{fontSize:22}}>{s.img}</div>
-              <div style={{fontSize:11,fontWeight:700,marginTop:5,color:p.soil===s.val?"#4ade80":"#94a3b8",lineHeight:1.3}}>{s.desc}</div>
+              <div style={{fontSize:11,fontWeight:700,marginTop:5,color:p.soil===s.val?"#7a3a00":"#9a6030",lineHeight:1.3}}>{s.desc}</div>
             </div>
           ))}
         </div>
@@ -1668,8 +1716,8 @@ function MobileScreens(p) {
 
       {/* Rainfall tiles */}
       <div style={{marginBottom:16}}>
-        <div style={{fontSize:12,color:"#64748b",marginBottom:8,fontWeight:600}}>
-          {p.t.rainfallLevel} {p.weather&&<span style={{fontSize:9,background:"#052e16",color:"#4ade80",borderRadius:4,padding:"1px 5px",fontWeight:700}}>🟢 AUTO</span>}
+        <div style={{fontSize:12,color:"#7a5030",marginBottom:8,fontWeight:600}}>
+          {p.t.rainfallLevel} {p.weather&&<span style={{fontSize:9,background:"rgba(40,120,0,0.1)",color:"#2a7a00",borderRadius:4,padding:"1px 5px",fontWeight:700}}>🟢 AUTO</span>}
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
           {[
@@ -1677,9 +1725,9 @@ function MobileScreens(p) {
             {val:"medium", emoji:"🌦️", desc:p.t.rainfallOptions.medium},
             {val:"high",   emoji:"🌧️", desc:p.t.rainfallOptions.high},
           ].map(r=>(
-            <div key={r.val} onClick={()=>p.setRainfall(r.val)} style={{padding:"12px 6px",borderRadius:12,border:`2px solid ${p.rainfall===r.val?"#4ade80":"#1e293b"}`,background:p.rainfall===r.val?"#052e16":"#0a1225",cursor:"pointer",textAlign:"center",transition:"all .15s"}}>
+            <div key={r.val} onClick={()=>p.setRainfall(r.val)} style={{padding:"12px 6px",borderRadius:12,border:`2px solid ${p.rainfall===r.val?"#7a3a00":"rgba(180,120,40,0.2)"}`,background:p.rainfall===r.val?"rgba(120,60,0,0.1)":"rgba(255,248,230,0.7)",cursor:"pointer",textAlign:"center",transition:"all .15s"}}>
               <div style={{fontSize:26}}>{r.emoji}</div>
-              <div style={{fontSize:10,fontWeight:700,marginTop:5,color:p.rainfall===r.val?"#4ade80":"#94a3b8",lineHeight:1.3}}>{r.desc}</div>
+              <div style={{fontSize:10,fontWeight:700,marginTop:5,color:p.rainfall===r.val?"#7a3a00":"#9a6030",lineHeight:1.3}}>{r.desc}</div>
             </div>
           ))}
         </div>
@@ -1687,17 +1735,17 @@ function MobileScreens(p) {
 
       {/* Season tiles */}
       <div>
-        <div style={{fontSize:12,color:"#64748b",marginBottom:8,fontWeight:600}}>
-          {p.t.seasonLabel} <span style={{fontSize:9,background:"#052e16",color:"#4ade80",borderRadius:4,padding:"1px 5px",fontWeight:700}}>🟢 AUTO</span>
+        <div style={{fontSize:12,color:"#7a5030",marginBottom:8,fontWeight:600}}>
+          {p.t.seasonLabel} <span style={{fontSize:9,background:"rgba(40,120,0,0.1)",color:"#2a7a00",borderRadius:4,padding:"1px 5px",fontWeight:700}}>🟢 AUTO</span>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
           {[
             {val:"kharif",emoji:"🌱",desc:p.t.seasonOptions.kharif},
             {val:"rabi",  emoji:"❄️",desc:p.t.seasonOptions.rabi},
           ].map(s=>(
-            <div key={s.val} onClick={()=>p.setSeason(s.val)} style={{padding:"12px 8px",borderRadius:12,border:`2px solid ${p.season===s.val?"#4ade80":"#1e293b"}`,background:p.season===s.val?"#052e16":"#0a1225",cursor:"pointer",textAlign:"center",transition:"all .15s"}}>
+            <div key={s.val} onClick={()=>p.setSeason(s.val)} style={{padding:"12px 8px",borderRadius:12,border:`2px solid ${p.season===s.val?"#7a3a00":"rgba(180,120,40,0.2)"}`,background:p.season===s.val?"rgba(120,60,0,0.1)":"rgba(255,248,230,0.7)",cursor:"pointer",textAlign:"center",transition:"all .15s"}}>
               <div style={{fontSize:26}}>{s.emoji}</div>
-              <div style={{fontSize:11,fontWeight:700,marginTop:5,color:p.season===s.val?"#4ade80":"#94a3b8"}}>{s.desc}</div>
+              <div style={{fontSize:11,fontWeight:700,marginTop:5,color:p.season===s.val?"#7a3a00":"#9a6030"}}>{s.desc}</div>
             </div>
           ))}
         </div>
@@ -1706,10 +1754,10 @@ function MobileScreens(p) {
 
     <div style={card}>
       <div style={lbl}>{p.t.voiceTitle}</div>
-      <button style={{...btn,background:p.listening?"linear-gradient(135deg,#ef4444,#dc2626)":"linear-gradient(135deg,#1d4ed8,#1e40af)",color:"#fff"}} onClick={p.startVoice}>
+      <button style={{...btn,background:p.listening?"linear-gradient(135deg,#cc2200,#991100)":"linear-gradient(135deg,#4a2200,#7a4010)",color:"#fff8ee"}} onClick={p.startVoice}>
         {p.listening?p.t.voiceListening:p.t.voiceBtn}
       </button>
-      {p.voiceText&&<div style={{marginTop:8,fontSize:12,color:"#94a3b8",fontStyle:"italic"}}>"{p.voiceText}"</div>}
+      {p.voiceText&&<div style={{marginTop:8,fontSize:12,color:"#9a6030",fontStyle:"italic"}}>"{p.voiceText}"</div>}
     </div>
     <div style={{margin:"0 14px 12px"}}>
       <button className="bb" style={{...btn,opacity:(!p.soil||!p.rainfall||!p.season)?0.5:1}} onClick={p.getRecommendations} disabled={p.loading||!p.soil||!p.rainfall||!p.season}>
@@ -1717,14 +1765,14 @@ function MobileScreens(p) {
       </button>
     </div>
     {p.screen==="results"&&p.results.map((crop,i)=>(
-      <div key={crop.name} onClick={()=>p.setExpanded(p.expanded===crop.name?null:crop.name)} style={{...card,border:`1px solid ${i===0?"#166534":"#1e293b"}`}}>
-        {i===0&&<div style={{fontSize:9,background:"#854d0e",color:"#fbbf24",borderRadius:5,padding:"2px 7px",fontWeight:700,marginBottom:6,display:"inline-block"}}>{p.t.topPick}</div>}
+      <div key={crop.name} onClick={()=>p.setExpanded(p.expanded===crop.name?null:crop.name)} style={{...card,border:`1.5px solid ${i===0?"rgba(40,120,0,0.3)":"rgba(180,120,40,0.2)"}`}}>
+        {i===0&&<div style={{fontSize:9,background:"rgba(180,80,0,0.12)",color:"#b85c00",borderRadius:5,padding:"2px 7px",fontWeight:700,marginBottom:6,display:"inline-block"}}>{p.t.topPick}</div>}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <span style={{fontSize:28}}>{crop.icon}</span>
             <div>
               <div style={{fontWeight:800,fontSize:15}}>{crop.name}</div>
-              <div style={{fontSize:12,color:"#4ade80",fontWeight:700}}>₹{crop.price.toLocaleString()}/q<LiveTag live={crop.isLive}/></div>
+              <div style={{fontSize:12,color:"#2a7a00",fontWeight:700}}>₹{crop.price.toLocaleString()}/q<LiveTag live={crop.isLive}/></div>
             </div>
           </div>
         </div>
@@ -1735,12 +1783,12 @@ function MobileScreens(p) {
 
   if (p.screen==="market") return(<>
     <div style={{...card,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-      <div><div style={lbl}>{p.t.mandiIntelligence}</div><div style={{fontSize:11,color:"#475569"}}>{p.liveCount>0?p.t.liveCount(p.liveCount):p.t.estimated}</div></div>
-      <button style={{padding:"8px 14px",background:"transparent",border:"1px solid #1e293b",borderRadius:8,color:"#64748b",cursor:"pointer",fontSize:12}} onClick={()=>p.refreshMandiPrices()}>
+      <div><div style={lbl}>{p.t.mandiIntelligence}</div><div style={{fontSize:11,color:"#9a6030"}}>{p.liveCount>0?p.t.liveCount(p.liveCount):p.t.estimated}</div></div>
+      <button style={{padding:"8px 14px",background:"transparent",border:"1.5px solid rgba(180,120,40,0.2)",borderRadius:8,color:"#7a5030",cursor:"pointer",fontSize:12}} onClick={()=>p.refreshMandiPrices()}>
         {p.mandiLoading?<span style={spin}>⟳</span>:p.t.refreshBtn}
       </button>
     </div>
-    {p.mandiErr==="no_key"&&<div style={{...card,color:"#fbbf24",fontSize:12}}>{p.t.noKeyMsg}</div>}
+    {p.mandiErr==="no_key"&&<div style={{...card,color:"#b85c00",fontSize:12}}>{p.t.noKeyMsg}</div>}
     {Object.entries(CROP_META).map(([name,data])=>{
       const live=p.mandiPrices[name];
       const price=live||data.fallbackPrice;
@@ -1749,7 +1797,7 @@ function MobileScreens(p) {
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <div style={{display:"flex",alignItems:"center",gap:10}}><span style={{fontSize:22}}>{data.icon}</span><div style={{fontWeight:700,fontSize:14}}>{name}</div></div>
             <div style={{textAlign:"right"}}>
-              <div style={{fontWeight:700,color:live?"#4ade80":"#fbbf24"}}>₹{price.toLocaleString()}/q</div>
+              <div style={{fontWeight:700,color:live?"#2a7a00":"#b85c00"}}>₹{price.toLocaleString()}/q</div>
               <LiveTag live={!!live}/>
             </div>
           </div>
@@ -1763,22 +1811,22 @@ function MobileScreens(p) {
     <div style={card}>
       <div style={lbl}>💰 {p.t.profitSimTitle}</div>
       <div style={{marginBottom:14}}>
-        <div style={{fontSize:12,color:"#64748b",marginBottom:4}}>{p.t.selectCrop} (🟢 live)</div>
+        <div style={{fontSize:12,color:"#7a5030",marginBottom:4}}>{p.t.selectCrop} (🟢 live)</div>
         <select style={sel} value={p.profitCrop} onChange={e=>p.setProfitCrop(e.target.value)}>
           {Object.keys(CROP_META).map(c=><option key={c} value={c}>{CROP_META[c].icon} {c}{p.isLive(c)?" 🟢":""}</option>)}
         </select>
       </div>
       <div style={{marginBottom:14}}>
-        <div style={{fontSize:12,color:"#64748b",marginBottom:4}}>{p.t.landArea}: <strong style={{color:"#e2e8f0"}}>{p.area} {p.t.acres}</strong></div>
-        <input type="range" min="0.5" max="20" step="0.5" value={p.area} onChange={e=>p.setArea(Number(e.target.value))} style={{width:"100%",accentColor:"#4ade80",cursor:"pointer"}}/>
+        <div style={{fontSize:12,color:"#7a5030",marginBottom:4}}>{p.t.landArea}: <strong style={{color:"#3a1f00"}}>{p.area} {p.t.acres}</strong></div>
+        <input type="range" min="0.5" max="20" step="0.5" value={p.area} onChange={e=>p.setArea(Number(e.target.value))} style={{width:"100%",accentColor:"#7a3a00",cursor:"pointer"}}/>
       </div>
       <div>
-        <div style={{fontSize:12,color:"#64748b",marginBottom:4}}>{p.t.costPerAcre}</div>
+        <div style={{fontSize:12,color:"#7a5030",marginBottom:4}}>{p.t.costPerAcre}</div>
         <input type="number" min="0" step="500" value={p.costPerAcre} onChange={e=>p.setCostPerAcre(Number(e.target.value))} placeholder={p.t.costPlaceholder} style={{...inp,width:"100%"}}/>
       </div>
     </div>
     {p.profitMeta&&(
-      <div style={{...card,background:"linear-gradient(135deg,#052e16,#0a1628)"}}>
+      <div style={{...card,background:"rgba(255,252,242,0.95)",border:"1.5px solid rgba(180,120,40,0.2)"}}>
         <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
           <span style={{fontSize:34}}>{p.profitMeta.icon}</span>
           <div>
@@ -1790,22 +1838,22 @@ function MobileScreens(p) {
           </div>
         </div>
         {/* Gross income */}
-        <div style={{background:"#0a2010",border:"1px solid #166534",borderRadius:12,padding:"16px",textAlign:"center",marginBottom:10}}>
-          <div style={{fontSize:10,color:"#4ade8099",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:4}}>{p.t.grossIncome}</div>
-          <div style={{fontSize:28,fontWeight:900,color:"#4ade80",letterSpacing:"-1px"}}>₹{p.profitEstimate}</div>
+        <div style={{background:"rgba(40,120,0,0.08)",border:"1px solid rgba(40,120,0,0.25)",borderRadius:12,padding:"16px",textAlign:"center",marginBottom:10}}>
+          <div style={{fontSize:10,color:"rgba(40,120,0,0.7)",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:4}}>{p.t.grossIncome}</div>
+          <div style={{fontSize:28,fontWeight:900,color:"#2a7a00",letterSpacing:"-1px"}}>₹{p.profitEstimate}</div>
         </div>
         {/* Cost */}
-        <div style={{background:"#1c0505",border:"1px solid #7f1d1d",borderRadius:12,padding:"14px",textAlign:"center",marginBottom:10}}>
-          <div style={{fontSize:10,color:"#f8717199",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:4}}>{p.t.totalCost}</div>
-          <div style={{fontSize:22,fontWeight:800,color:"#f87171"}}>− ₹{p.totalCost.toLocaleString("en-IN")}</div>
+        <div style={{background:"rgba(180,0,0,0.07)",border:"1px solid rgba(180,0,0,0.2)",borderRadius:12,padding:"14px",textAlign:"center",marginBottom:10}}>
+          <div style={{fontSize:10,color:"rgba(180,0,0,0.6)",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:4}}>{p.t.totalCost}</div>
+          <div style={{fontSize:22,fontWeight:800,color:"#cc2200"}}>− ₹{p.totalCost.toLocaleString("en-IN")}</div>
         </div>
         {/* Net profit */}
-        <div style={{background:p.netProfitAmt>=0?"#052e16":"#1c0505",border:`1px solid ${p.netProfitAmt>=0?"#166534":"#7f1d1d"}`,borderRadius:12,padding:"18px",textAlign:"center"}}>
-          <div style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:6,color:p.netProfitAmt>=0?"#4ade80":"#f87171"}}>{p.t.netProfit}</div>
-          <div style={{fontSize:32,fontWeight:900,letterSpacing:"-1px",color:p.netProfitAmt>=0?"#4ade80":"#f87171"}}>
+        <div style={{background:p.netProfitAmt>=0?"rgba(40,120,0,0.08)":"rgba(180,0,0,0.07)",border:`1.5px solid ${p.netProfitAmt>=0?"rgba(40,120,0,0.25)":"rgba(180,0,0,0.2)"}`,borderRadius:12,padding:"18px",textAlign:"center"}}>
+          <div style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:6,color:p.netProfitAmt>=0?"#2a7a00":"#cc2200"}}>{p.t.netProfit}</div>
+          <div style={{fontSize:32,fontWeight:900,letterSpacing:"-1px",color:p.netProfitAmt>=0?"#2a7a00":"#cc2200"}}>
             {p.netProfitAmt>=0?"":"−"}₹{Math.abs(p.netProfitAmt).toLocaleString("en-IN")}
           </div>
-          <div style={{fontSize:11,marginTop:6,color:p.netProfitAmt>=0?"#166534":"#7f1d1d"}}>{p.t.netProfitTitle}</div>
+          <div style={{fontSize:11,marginTop:6,color:p.netProfitAmt>=0?"#2a7a00":"#cc2200"}}>{p.t.netProfitTitle}</div>
         </div>
         <div style={{marginTop:12}}><RiskMeter value={p.profitMeta.risk} lang={p.lang}/></div>
       </div>
@@ -1815,18 +1863,18 @@ function MobileScreens(p) {
   if (p.screen==="alerts") return(<>
     <div style={{...card}}>
       <div style={lbl}>{p.t.alertsTitle}</div>
-      <div style={{fontSize:12,color:"#64748b"}}>{p.t.alertsDesc}</div>
+      <div style={{fontSize:12,color:"#7a5030"}}>{p.t.alertsDesc}</div>
     </div>
     {[{crop:"Tomato",risk:72,reason:{en:"Many farmers in Karnataka & Maharashtra are growing this — prices may fall at harvest time.",hi:"बहुत किसान उगा रहे हैं — कटाई पर भाव गिर सकता है।",kn:"ಅನೇಕ ರೈತರು ಬೆಳೆಯುತ್ತಿದ್ದಾರೆ — ಬೆಲೆ ಕಡಿಮೆಯಾಗಬಹುದು."},alt:"Capsicum",altRisk:31},{crop:"Onion",risk:68,reason:{en:"Big harvest expected across South India — market may be flooded.",hi:"दक्षिण भारत में भारी फसल — बाज़ार में ज़्यादा माल आ सकता है।",kn:"ದಕ್ಷಿಣ ಭಾರತದಲ್ಲಿ ಹೆಚ್ಚು ಫಸಲು — ಬೆಲೆ ಕಡಿಮೆಯಾಗಬಹುದು."},alt:"Garlic",altRisk:38},{crop:"Potato",risk:48,reason:{en:"Cold storage in UP & MP is full — extra supply pushing prices down.",hi:"UP/MP में कोल्ड स्टोरेज भरा है — भाव दब रहे हैं।",kn:"ಶೀತಲ ಸಂಗ್ರಹ ತುಂಬಿದೆ — ಬೆಲೆ ಕಡಿಮೆಯಾಗುತ್ತಿದೆ."},alt:"Chickpea",altRisk:19}].map((a,i)=>(
-      <div key={i} style={{...card,background:"linear-gradient(135deg,#100a02,#0a1628)",border:"1px solid #854d0e"}}>
+      <div key={i} style={{...card,background:"rgba(255,240,210,0.9)",border:"1.5px solid rgba(180,80,0,0.25)"}}>
         <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
           <span style={{fontWeight:800}}>{CROP_META[a.crop]?.icon} {a.crop}</span>
-          <span style={{fontSize:10,background:"#78350f",color:"#fbbf24",borderRadius:6,padding:"2px 8px",fontWeight:700}}>{p.t.riskBadge}</span>
+          <span style={{fontSize:10,background:"rgba(180,80,0,0.15)",color:"#b85c00",borderRadius:6,padding:"2px 8px",fontWeight:700}}>{p.t.riskBadge}</span>
         </div>
         <RiskMeter value={a.risk} lang={p.lang}/>
-        <div style={{marginTop:10,fontSize:12,color:"#94a3b8",lineHeight:1.6}}>{a.reason[p.lang]||a.reason.en}</div>
-        <div style={{marginTop:8,padding:"8px 10px",background:"#052e16",borderRadius:8,border:"1px solid #166534"}}>
-          <div style={{fontSize:11,color:"#4ade80",marginBottom:2}}>{p.t.alertSwitch}</div>
+        <div style={{marginTop:10,fontSize:12,color:"#9a6030",lineHeight:1.6}}>{a.reason[p.lang]||a.reason.en}</div>
+        <div style={{marginTop:8,padding:"8px 10px",background:"rgba(120,60,0,0.08)",borderRadius:8,border:"1px solid rgba(40,120,0,0.25)"}}>
+          <div style={{fontSize:11,color:"#2a7a00",marginBottom:2}}>{p.t.alertSwitch}</div>
           <div style={{fontSize:13,fontWeight:700}}>{CROP_META[a.alt]?.icon} {a.alt}</div>
         </div>
       </div>
@@ -1839,28 +1887,36 @@ function MobileScreens(p) {
 //  APP ROOT — auth flow → dashboard
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function App() {
-  const [authScreen, setAuthScreen] = useState("splash"); // splash | register | login | otp | app
-  const [userName, setUserName]     = useState("");
+  const [history, setHistory] = useState(["splash"]);
+  const [userName, setUserName] = useState("");
+
+  const authScreen = history[history.length - 1];
+
+  const goTo = (screen) => setHistory(prev => [...prev, screen]);
+  const goBack = () => setHistory(prev => prev.length > 1 ? prev.slice(0, -1) : prev);
 
   if (authScreen === "splash")
-    return <SplashScreen onFinish={() => setAuthScreen("register")} />;
+    return <SplashScreen onFinish={() => goTo("register")} />;
 
   if (authScreen === "register")
     return <RegisterScreen
-      onSignUp={d => { setUserName(d.name); setAuthScreen("app"); }}
-      onNavigate={setAuthScreen} />;
+      onSignUp={d => { setUserName(d.name); goTo("app"); }}
+      onNavigate={goTo}
+      onBack={goBack} />;
 
   if (authScreen === "login")
     return <LoginScreen
-      onGetOtp={() => setAuthScreen("otp")}
-      onNavigate={setAuthScreen} />;
+      onGetOtp={() => goTo("otp")}
+      onNavigate={goTo}
+      onBack={goBack} />;
 
   if (authScreen === "otp")
     return <OtpScreen
-      onLogin={() => setAuthScreen("app")}
-      onNavigate={setAuthScreen} />;
+      onLogin={() => goTo("app")}
+      onNavigate={goTo}
+      onBack={goBack} />;
 
   return <CropWiseDashboard
     userName={userName}
-    onLogout={() => { setAuthScreen("login"); setUserName(""); }} />;
+    onLogout={() => { setHistory(["login"]); setUserName(""); }} />;
 }
