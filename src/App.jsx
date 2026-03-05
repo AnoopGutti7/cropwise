@@ -237,8 +237,8 @@ function DesktopScreens({screen,soil,setSoil,rainfall,setRainfall,season,setSeas
 
   if(screen==="market")return(<>
     <div style={{marginBottom:20}}><div style={lbl}>📊 Market Intelligence</div><div style={{fontSize:13,color:"#475569"}}>5-year price & risk analysis</div></div>
-    <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:16}}>
-      {Object.entries(CROP_DATA).slice(0,10).map(([name,data])=>(
+    <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16}}>
+      {Object.entries(CROP_DATA).map(([name,data])=>(
         <div key={name} className="hw" style={{background:"linear-gradient(145deg,#0f172a,#0a1628)",border:"1px solid #1e293b",borderRadius:18,padding:"20px",cursor:"pointer"}} onClick={()=>setExpanded(expanded===name?null:name)}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}><div style={{display:"flex",alignItems:"center",gap:10}}><span style={{fontSize:26}}>{data.icon}</span><div><div style={{fontWeight:700,fontSize:15}}>{name}</div><div style={{fontSize:12,color:"#475569"}}>₹{data.price.toLocaleString()}/q</div></div></div><div style={{textAlign:"right"}}><MiniChart data={data.trend}/><div style={{fontSize:11,color:data.trend[4]>data.trend[0]?"#4ade80":"#ef4444",marginTop:4}}>{data.trend[4]>data.trend[0]?"▲":"▼"} {Math.round(Math.abs(data.trend[4]-data.trend[0])/data.trend[0]*100)}% (5yr)</div></div></div>
           <RiskMeter value={data.risk}/>
@@ -249,7 +249,7 @@ function DesktopScreens({screen,soil,setSoil,rainfall,setRainfall,season,setSeas
   </>);
 
   if(screen==="profit")return(
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24}}>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1.6fr",gap:28}}>
       <div>
         <div style={card}>
           <div style={lbl}>💰 Profit Simulator</div>
