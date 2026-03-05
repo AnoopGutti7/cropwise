@@ -855,8 +855,18 @@ function getSeasonLabel() {
 
 async function fetchOpenMeteoWeather(lat, lon) {
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=precipitation_sum,temperature_2m_max,temperature_2m_min&forecast_days=30&timezone=auto`;
-  const res = await fetch(url);
-  const d = await res.json();
+  // Try twice before giving up
+  let res, d;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      res = await fetch(url);
+      d = await res.json();
+      break;
+    } catch(e) {
+      if (attempt === 1) throw e;
+      await new Promise(r => setTimeout(r, 1200));
+    }
+  }
   const totalRain = d.daily.precipitation_sum.reduce((a,b)=>a+(b||0),0);
   const avgTemp = d.daily.temperature_2m_max.reduce((a,b)=>a+b,0) / d.daily.temperature_2m_max.length;
   return {
@@ -1020,7 +1030,7 @@ function CropWiseDashboard({ userName, onLogout }) {
     setWeatherLoading(true); setWeatherErr("");
     fetchOpenMeteoWeather(coords.lat, coords.lon)
       .then(w=>{ setWeather(w); setRainfall(w.rainfallLevel); })
-      .catch(()=>setWeatherErr("Could not fetch weather. Check connection."))
+      .catch(()=>setWeatherErr("Weather fetch failed — select soil & rainfall manually below."))
       .finally(()=>setWeatherLoading(false));
   },[coords]);
 
@@ -1147,6 +1157,7 @@ function CropWiseDashboard({ userName, onLogout }) {
     getPrice,isLive,hasMandiKey,liveCount,
     lang,setLang,T,t,
     costPerAcre,setCostPerAcre,netProfitAmt,totalCost,grossRevenue,
+    onLogout,userName,
   };
 
   const blobs=[["15%","-5%","#22c55e"],["55%","65%","#0ea5e9"],["85%","25%","#a855f7"]];
@@ -1191,11 +1202,17 @@ function CropWiseDashboard({ userName, onLogout }) {
         </nav>
 
         <div style={{padding:"16px 24px",borderTop:"1.5px solid rgba(180,120,40,0.2)"}}>
-          <div style={{background:"rgba(120,60,0,0.08)",border:"1px solid rgba(120,60,0,0.18)",borderRadius:10,padding:"10px 14px"}}>
+          <div style={{background:"rgba(120,60,0,0.08)",border:"1px solid rgba(120,60,0,0.18)",borderRadius:10,padding:"10px 14px",marginBottom:10}}>
             <div style={{fontSize:10,color:"#b85c00",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em"}}>{t.season}</div>
             <div style={{fontSize:14,fontWeight:700,color:"#7a3a00",marginTop:3}}>🌾 {getSeasonLabel()}</div>
           </div>
-          {lastUpdated && <div style={{fontSize:10,color:"#9a6030",marginTop:8,textAlign:"center"}}>{t.pricesUpdated} {lastUpdated.toLocaleTimeString()}</div>}
+          {lastUpdated && <div style={{fontSize:10,color:"#9a6030",marginBottom:10,textAlign:"center"}}>{t.pricesUpdated} {lastUpdated.toLocaleTimeString()}</div>}
+          {userName && <div style={{fontSize:12,color:"#7a5030",fontWeight:600,marginBottom:8,textAlign:"center"}}>👤 {userName}</div>}
+          <button onClick={onLogout} style={{width:"100%",padding:"9px",background:"rgba(180,0,0,0.07)",border:"1.5px solid rgba(180,0,0,0.18)",borderRadius:10,color:"#cc2200",fontSize:13,fontWeight:700,cursor:"pointer",transition:"all .2s"}}
+            onMouseEnter={e=>e.target.style.background="rgba(180,0,0,0.14)"}
+            onMouseLeave={e=>e.target.style.background="rgba(180,0,0,0.07)"}>
+            🚪 Logout
+          </button>
         </div>
       </aside>
 
@@ -1225,6 +1242,7 @@ function CropWiseDashboard({ userName, onLogout }) {
       </div>
       <div style={{display:"flex",gap:6,padding:"0 14px 14px",overflowX:"auto",position:"relative",zIndex:1}}>
         {NAV_IDS.map(n=>{const active=screen===n.id||(screen==="results"&&n.id==="plan"); return<button key={n.id} onClick={()=>go(n.id)} style={{padding:"7px 13px",borderRadius:99,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,whiteSpace:"nowrap",background:active?"#7a3a00":"rgba(120,60,0,0.1)",color:active?"#fff8ee":"#7a5030",transition:"all .2s"}}>{n.icon} {t[n.tk]}</button>;})}
+        <button onClick={onLogout} style={{padding:"7px 13px",borderRadius:99,border:"1px solid rgba(180,0,0,0.2)",cursor:"pointer",fontSize:12,fontWeight:600,whiteSpace:"nowrap",background:"rgba(180,0,0,0.07)",color:"#cc2200",marginLeft:"auto",flexShrink:0}}>🚪</button>
       </div>
       <div className="fade" key={screen} style={{position:"relative",zIndex:1,paddingBottom:40}}>
         <MobileScreens {...shared}/>
@@ -1291,16 +1309,41 @@ function DesktopScreens(p) {
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
         {[
-          {icon:"🌧",label:p.t.rainfallLevel,value:p.weather?`${p.weather.rainfallMm}mm`:p.weatherLoading?p.t.locating:"Use Crop Plan",sub:p.weather?`${p.weather.rainfallLevel} level`:"Open-Meteo API",live:!!p.weather},
-          {icon:"🌡",label:"Avg Temp",value:p.weather?`${p.weather.avgTempC}°C`:p.weatherLoading?"...":"—",sub:"30-day forecast",live:!!p.weather},
-          {icon:"📊",label:p.t.marketPrices,value:p.mandiLoading?"Fetching...":p.liveCount>0?p.t.liveCount(p.liveCount):p.hasMandiKey?"0 fetched":"Add API key",sub:p.lastUpdated?`${p.lastUpdated.toLocaleTimeString()}`:"data.gov.in",live:p.liveCount>0},
-          {icon:"📅",label:p.t.seasonWidget,value:getSeasonLabel(),sub:"Auto-detected",live:true},
+          {
+            icon:"🌧", label:"Rainfall", to:"plan",
+            value: p.weather ? `${p.weather.rainfallMm}mm` : p.weatherLoading ? "Detecting…" : "Tap to detect",
+            sub:   p.weather ? `${p.weather.rainfallLevel} — 30 day total` : "Go to Crop Plan → detect location",
+            live:  !!p.weather,
+            actionLabel: p.weather ? null : "📍 Detect Now",
+          },
+          {
+            icon:"🌡", label:"Avg Temperature", to:"plan",
+            value: p.weather ? `${p.weather.avgTempC}°C` : p.weatherLoading ? "Detecting…" : "Tap to detect",
+            sub:   p.weather ? "30-day average high" : "Auto-detected after location",
+            live:  !!p.weather,
+            actionLabel: p.weather ? null : "📍 Detect Now",
+          },
+          {
+            icon:"📊", label:"Mandi Prices", to:"market",
+            value: p.mandiLoading ? "Fetching…" : p.liveCount>0 ? `${p.liveCount} crops tracked` : "View Markets",
+            sub:   p.liveCount>0 ? `Updated ${p.lastUpdated?.toLocaleTimeString()||""}` : "Tap to open live market prices",
+            live:  p.liveCount>0,
+            actionLabel: p.liveCount===0 ? "→ Open Markets" : null,
+          },
+          {
+            icon:"📅", label:"Current Season", to:"plan",
+            value: getSeasonLabel(),
+            sub:   `Auto-detected · Tap to plan ${getCurrentSeason()} crops`,
+            live:  true,
+            actionLabel: "→ Start Planning",
+          },
         ].map((s,i)=>(
-          <div key={i} style={{background:"rgba(255,248,230,0.88)",borderRadius:14,padding:"16px 18px",border:"1.5px solid rgba(180,120,40,0.2)"}}>
+          <div key={i} className="hw" onClick={()=>p.go(s.to)} style={{background:"rgba(255,248,230,0.88)",borderRadius:14,padding:"16px 18px",border:"1.5px solid rgba(180,120,40,0.2)",cursor:"pointer"}}>
             <div style={{fontSize:24}}>{s.icon}</div>
-            <div style={{fontWeight:800,fontSize:16,marginTop:8}}>{s.value}</div>
+            <div style={{fontWeight:800,fontSize:16,marginTop:8,color:"#3a1f00"}}>{s.value}</div>
             <div style={{fontSize:11,color:"#9a6030",marginTop:3,display:"flex",alignItems:"center",gap:4}}>{s.label}<LiveTag live={s.live}/></div>
-            <div style={{fontSize:10,color:"#b87040",marginTop:2}}>{s.sub}</div>
+            <div style={{fontSize:10,color:"#b87040",marginTop:3,lineHeight:1.4}}>{s.sub}</div>
+            {s.actionLabel && <div style={{marginTop:8,fontSize:11,fontWeight:700,color:"#7a3a00",background:"rgba(120,60,0,0.08)",borderRadius:6,padding:"3px 8px",display:"inline-block"}}>{s.actionLabel}</div>}
           </div>
         ))}
       </div>
@@ -1329,7 +1372,10 @@ function DesktopScreens(p) {
       </div>
       {p.locErr&&<div style={{fontSize:12,color:"#cc2200",marginBottom:10}}>⚠️ {p.locErr}</div>}
       {p.weatherLoading&&<div style={{padding:"12px",background:"rgba(255,248,230,0.7)",borderRadius:10,fontSize:13,color:"#9a6030"}}>{p.t.fetchingWeather}</div>}
-      {p.weatherErr&&<div style={{fontSize:12,color:"#cc2200"}}>{p.weatherErr}</div>}
+      {p.weatherErr&&<div style={{fontSize:12,color:"#b85c00",background:"rgba(180,100,0,0.07)",border:"1px solid rgba(180,100,0,0.18)",borderRadius:10,padding:"8px 12px",marginTop:6,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <span>🌤 {p.weatherErr}</span>
+        <button onClick={p.detectLocation} style={{fontSize:11,fontWeight:700,color:"#7a3a00",background:"rgba(120,60,0,0.1)",border:"1px solid rgba(120,60,0,0.2)",borderRadius:8,padding:"3px 10px",cursor:"pointer"}}>⟳ Retry</button>
+      </div>}
       {p.weather&&(
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginTop:4}}>
           {[
@@ -1656,13 +1702,13 @@ function MobileScreens(p) {
       <div style={{fontSize:11,color:"#2a7a00",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:10}}>🌾 {getSeasonLabel()}</div>
       <div style={{fontSize:30,fontWeight:900,letterSpacing:"-1px",lineHeight:1.1}}>{p.t.growSmarter}<br/><span style={{color:"#2a7a00"}}>{p.t.earnBetter}</span></div>
       {p.weather&&<div style={{marginTop:10,display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-        <div style={{background:"rgba(120,60,0,0.08)",borderRadius:10,padding:"8px 10px",border:"1px solid rgba(40,120,0,0.25)"}}>
+        <div style={{background:"rgba(120,60,0,0.08)",borderRadius:10,padding:"8px 10px",border:"1px solid rgba(40,120,0,0.2)"}}>
           <div style={{fontSize:9,color:"rgba(40,120,0,0.6)",fontWeight:700,textTransform:"uppercase"}}>🌧 {p.t.rainfallLevel}</div>
           <div style={{fontSize:16,fontWeight:800,color:"#2a7a00"}}>{p.weather.rainfallMm}mm <span style={{fontSize:10}}>{p.weather.rainfallLevel}</span></div>
         </div>
-        <div style={{background:"rgba(120,60,0,0.08)",borderRadius:10,padding:"8px 10px",border:"1px solid #166634"}}>
-          <div style={{fontSize:9,color:"#f59e0b66",fontWeight:700,textTransform:"uppercase"}}>🌡 Temp</div>
-          <div style={{fontSize:16,fontWeight:800,color:"#f59e0b"}}>{p.weather.avgTempC}°C <span style={{fontSize:10}}>avg</span></div>
+        <div style={{background:"rgba(120,60,0,0.08)",borderRadius:10,padding:"8px 10px",border:"1px solid rgba(180,100,0,0.2)"}}>
+          <div style={{fontSize:9,color:"rgba(180,100,0,0.6)",fontWeight:700,textTransform:"uppercase"}}>🌡 Temp</div>
+          <div style={{fontSize:16,fontWeight:800,color:"#b85c00"}}>{p.weather.avgTempC}°C <span style={{fontSize:10}}>avg</span></div>
         </div>
       </div>}
       <button className="bb" style={{...btn,marginTop:16}} onClick={()=>p.go("plan")}>{p.t.startPlanning}</button>
