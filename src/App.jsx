@@ -2,6 +2,8 @@
 //  CropWise — Full App
 //  Auth flow: Splash → Register → Login → OTP → Dashboard
 // ─────────────────────────────────────────────────────────────────────────────
+import app from "./firebase";
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { useState, useEffect, useCallback, useRef } from "react";
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -309,65 +311,184 @@ const sp={
 //  REGISTER SCREEN
 // ═══════════════════════════════════════════════════════════════════════════════
 function RegisterScreen({ onSignUp, onNavigate, onBack }) {
+
   const [form,setForm]=useState({name:"",phone:"",password:"",confirm:""});
   const [focused,setFocused]=useState(null);
   const [visible,setVisible]=useState({password:false,confirm:false});
   const [submitted,setSubmitted]=useState(false);
+
+  const auth = getAuth(app);
+
   const set=(k,v)=>setForm(f=>({...f,[k]:v}));
+
   const passwordValid=form.password.length>=6&&/\d/.test(form.password);
   const passwordsMatch=!!(form.password&&form.confirm&&form.password===form.confirm);
   const mismatch=form.confirm.length>0&&form.password!==form.confirm;
-  const handleSignUp=()=>{
-    setSubmitted(true);
-    if(!form.name||!form.phone||!form.password||!form.confirm)return;
-    if(!passwordValid||!passwordsMatch)return;
-    if(onSignUp)onSignUp(form);
+
+  const err={
+    name:submitted&&!form.name,
+    phone:submitted&&!form.phone,
+    pass:submitted&&(!form.password||!passwordValid),
+    confirm:submitted&&(!form.confirm||!passwordsMatch)
   };
-  const err={name:submitted&&!form.name,phone:submitted&&!form.phone,pass:submitted&&(!form.password||!passwordValid),confirm:submitted&&(!form.confirm||!passwordsMatch)};
+
+  // SEND OTP FUNCTION
+  const sendOTP = () => {
+
+    if(!form.phone){
+      alert("Enter phone number");
+      return;
+    }
+
+    const phone = "+91" + form.phone;
+
+    window.recaptchaVerifier = new RecaptchaVerifier(
+      "recaptcha-container",
+      { size: "invisible" },
+      auth
+    );
+
+    const appVerifier = window.recaptchaVerifier;
+
+    signInWithPhoneNumber(auth, phone, appVerifier)
+      .then((confirmationResult)=>{
+        window.confirmationResult = confirmationResult;
+        alert("OTP Sent!");
+      })
+      .catch((error)=>{
+        console.log(error);
+      });
+  };
+
   return(
     <div style={rg.wrapper}>
+
+      {/* reCAPTCHA container (IMPORTANT) */}
+      <div id="recaptcha-container"></div>
+
       <style>{AUTH_CSS}</style>
-      <div style={rg.bg}/><div style={rg.bgGlow}/>
+
+      <div style={rg.bg}/>
+      <div style={rg.bgGlow}/>
       <TopCropDeco/>
-      {onBack && <button style={rg.backBtn} onClick={onBack} aria-label="Go back">‹</button>}
+
+      {onBack && <button style={rg.backBtn} onClick={onBack}>‹</button>}
+
       <div className="reg-title" style={rg.titleWrap}>
-        <div style={rg.logo}><span style={rg.cropWord}>Crop</span><span style={rg.wiseWord}>Wise</span></div>
+        <div style={rg.logo}>
+          <span style={rg.cropWord}>Crop</span>
+          <span style={rg.wiseWord}>Wise</span>
+        </div>
+
         <div style={rg.heading}>Register</div>
         <div style={rg.sub}>Join thousands of smart farmers</div>
       </div>
+
       <div className="reg-card" style={rg.card}>
+
         <div style={rg.fieldWrap}>
           <span style={rg.icon}>👤</span>
-          <input className={`reg-input${err.name?" error":""}`} placeholder="Full Name" value={form.name} onChange={e=>set("name",e.target.value)} onFocus={()=>setFocused("name")} onBlur={()=>setFocused(null)}/>
+
+          <input
+            className={`reg-input${err.name?" error":""}`}
+            placeholder="Full Name"
+            value={form.name}
+            onChange={e=>set("name",e.target.value)}
+          />
+
           {err.name&&<div style={rg.errMsg}>Please enter your name</div>}
         </div>
+
+
         <div style={rg.fieldWrap}>
           <span style={rg.icon}>📱</span>
+
           <div style={{position:"relative"}}>
+
             <span style={rg.dialCode}>+91</span>
-            <input className={`reg-input${err.phone?" error":""}`} placeholder="Phone Number" type="tel" value={form.phone} onChange={e=>set("phone",e.target.value.replace(/\D/g,"").slice(0,10))} onFocus={()=>setFocused("phone")} onBlur={()=>setFocused(null)} style={{paddingLeft:78}}/>
+
+            <input
+              className={`reg-input${err.phone?" error":""}`}
+              placeholder="Phone Number"
+              type="tel"
+              value={form.phone}
+              onChange={e=>set("phone",e.target.value.replace(/\D/g,"").slice(0,10))}
+              style={{paddingLeft:78}}
+            />
+
           </div>
+
           {err.phone&&<div style={rg.errMsg}>Please enter your phone number</div>}
         </div>
+
+
         <div style={rg.fieldWrap}>
           <span style={rg.icon}>🔒</span>
-          <input className={`reg-input${err.pass?" error":""}`} placeholder="Password" type={visible.password?"text":"password"} value={form.password} onChange={e=>set("password",e.target.value)} onFocus={()=>setFocused("password")} onBlur={()=>setFocused(null)} style={{paddingRight:44}}/>
-          <button style={rg.eyeBtn} onClick={()=>setVisible(v=>({...v,password:!v.password}))}>{visible.password?"🙈":"👁️"}</button>
-          {focused==="password"&&!err.pass&&<div style={rg.hintMsg}>🌾 Min. 6 characters with at least one number</div>}
-          {err.pass&&<div style={rg.errMsg}>{!form.password?"Please enter a password":"Min. 6 chars with at least one number"}</div>}
+
+          <input
+            className={`reg-input${err.pass?" error":""}`}
+            placeholder="Password"
+            type={visible.password?"text":"password"}
+            value={form.password}
+            onChange={e=>set("password",e.target.value)}
+            style={{paddingRight:44}}
+          />
+
+          <button
+            style={rg.eyeBtn}
+            onClick={()=>setVisible(v=>({...v,password:!v.password}))}
+          >
+            {visible.password?"🙈":"👁️"}
+          </button>
+
+          {err.pass&&
+            <div style={rg.errMsg}>
+              {!form.password ? "Please enter a password" : "Min. 6 chars with at least one number"}
+            </div>
+          }
         </div>
+
+
         <div style={rg.fieldWrap}>
           <span style={rg.icon}>🔐</span>
-          <input className={`reg-input${(err.confirm||mismatch)?" error":passwordsMatch?" match":""}`} placeholder="Re-enter Password" type={visible.confirm?"text":"password"} value={form.confirm} onChange={e=>set("confirm",e.target.value)} onFocus={()=>setFocused("confirm")} onBlur={()=>setFocused(null)} style={{paddingRight:44}}/>
-          <button style={rg.eyeBtn} onClick={()=>setVisible(v=>({...v,confirm:!v.confirm}))}>{visible.confirm?"🙈":"👁️"}</button>
+
+          <input
+            className={`reg-input${(err.confirm||mismatch)?" error":passwordsMatch?" match":""}`}
+            placeholder="Re-enter Password"
+            type={visible.confirm?"text":"password"}
+            value={form.confirm}
+            onChange={e=>set("confirm",e.target.value)}
+            style={{paddingRight:44}}
+          />
+
+          <button
+            style={rg.eyeBtn}
+            onClick={()=>setVisible(v=>({...v,confirm:!v.confirm}))}
+          >
+            {visible.confirm?"🙈":"👁️"}
+          </button>
+
           {mismatch&&<div style={rg.errMsg}>❌ Passwords do not match</div>}
           {passwordsMatch&&<div style={rg.matchMsg}>✅ Passwords match</div>}
-          {err.confirm&&!mismatch&&!passwordsMatch&&<div style={rg.errMsg}>Please confirm your password</div>}
         </div>
-        <button className="signup-btn" onClick={handleSignUp}>Sign Up</button>
-        <div style={rg.loginRow}>Already have an account?{" "}<span style={rg.loginLink} onClick={()=>onNavigate&&onNavigate("login")}>Log In</span></div>
+
+
+        {/* SEND OTP BUTTON */}
+        <button className="signup-btn" onClick={sendOTP}>
+          Send OTP
+        </button>
+
+        <div style={rg.loginRow}>
+          Already have an account?{" "}
+          <span style={rg.loginLink} onClick={()=>onNavigate&&onNavigate("login")}>
+            Log In
+          </span>
+        </div>
+
       </div>
+
       <BottomScene/>
+
     </div>
   );
 }
@@ -456,62 +577,163 @@ function LoginScreen({ onGetOtp, onNavigate, onBack }) {
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  OTP SCREEN  — demo mode (OTP: 1234)
-// ═══════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════
 function OtpScreen({ onLogin, onNavigate, onBack }) {
-  const [otp,setOtp]=useState(["","","",""]);
-  const [submitted,setSubmitted]=useState(false);
-  const [loading,setLoading]=useState(false);
-  const [error,setError]=useState("");
-  const refs=useRef([...Array(4)].map(()=>({current:null})));
-  const handleChange=(i,val)=>{const v=val.replace(/\D/g,"").slice(-1);const next=[...otp];next[i]=v;setOtp(next);if(v&&i<3)refs.current[i+1].current?.focus();};
-  const handleKey=(i,e)=>{if(e.key==="Backspace"&&!otp[i]&&i>0)refs.current[i-1].current?.focus();};
-  const handleLogin=()=>{
-    setSubmitted(true);setError("");
-    const code=otp.join("");if(code.length<4)return;
-    setLoading(true);
-    setTimeout(()=>{
-      if(code===window._cwDemoOtp||code==="1234"){
-        window._cwDemoOtp=null;
-        setLoading(false);
-        onLogin&&onLogin();
-      }else{
-        setError("Wrong OTP. Please try 1234 (demo mode).");
-        setLoading(false);
-      }
-    },900);
+
+  const [otp, setOtp] = useState(["", "", "", "","",""]);
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  useEffect(() => {
+
+  if(!window.confirmationResult){
+    sendOTP("+919972119465");
+  }
+
+}, []);
+
+  const refs = useRef([...Array(6)].map(()=>({current:null})));
+
+  const auth = getAuth(app);
+
+  // SEND OTP
+  const sendOTP = (phone) => {
+
+    if (!phone) {
+      alert("Enter phone number");
+      return;
+    }
+
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(
+        auth,
+        "recaptcha-container",
+        { size: "invisible" }
+      );
+    }
+
+    const appVerifier = window.recaptchaVerifier;
+
+    signInWithPhoneNumber(auth, phone, appVerifier)
+      .then((confirmationResult) => {
+        window.confirmationResult = confirmationResult;
+        alert("OTP Sent!");
+      })
+      .catch((error) => {
+        console.log(error);
+        alert(error.message);
+      });
   };
-  const showErr=submitted&&otp.some(d=>d==="");
+
+  const handleChange = (i,val)=>{
+    const v = val.replace(/\D/g,"").slice(-1);
+    const next=[...otp];
+    next[i]=v;
+    setOtp(next);
+    if(v && i<5) refs.current[i+1].current?.focus();
+  };
+
+  const handleKey=(i,e)=>{
+    if(e.key==="Backspace" && !otp[i] && i>0)
+      refs.current[i-1].current?.focus();
+  };
+
+  // VERIFY OTP
+  const handleLogin = () => {
+
+  const code = otp.join("");
+
+  if(code.length < 6){
+    setError("Enter full OTP");
+    return;
+  }
+
+  if(!window.confirmationResult){
+    setError("OTP not sent. Please click resend.");
+    return;
+  }
+
+  setLoading(true);
+
+  window.confirmationResult.confirm(code)
+    .then(() => {
+      setLoading(false);
+      alert("Login Successful ✅");
+      onLogin && onLogin();
+    })
+    .catch((error) => {
+      console.log(error);
+      setError("Invalid OTP");
+      setLoading(false);
+    });
+};
+
+  const showErr = submitted && otp.some(d=>d==="");
+
   return(
     <div style={rg.wrapper}>
+
       <style>{AUTH_CSS}</style>
-      <div style={rg.bg}/><div style={rg.bgGlow}/>
+
+      <div id="recaptcha-container"></div>
+
+      <div style={rg.bg}/>
+      <div style={rg.bgGlow}/>
       <TopCropDeco/>
-      {onBack && <button style={rg.backBtn} onClick={onBack} aria-label="Go back">‹</button>}
+
+      {onBack && <button style={rg.backBtn} onClick={onBack}>‹</button>}
+
       <div className="reg-title" style={{...rg.titleWrap,paddingBottom:0}}>
-        <div style={rg.logo}><span style={rg.cropWord}>Crop</span><span style={rg.wiseWord}>Wise</span></div>
+        <div style={rg.logo}>
+          <span style={rg.cropWord}>Crop</span>
+          <span style={rg.wiseWord}>Wise</span>
+        </div>
+
         <div style={rg.heading}>Enter OTP</div>
         <div style={rg.sub}>Sent to your registered number</div>
       </div>
+
       <div className="reg-card" style={{...rg.card,marginTop:28,alignItems:"center",gap:18}}>
+
         <div style={{display:"flex",gap:12,justifyContent:"center"}}>
           {otp.map((digit,i)=>(
-            <input key={i} ref={el=>{refs.current[i].current=el;}}
+            <input
+              key={i}
+              ref={el=>{refs.current[i].current=el;}}
               className={`otp-box${digit?" filled":""}${showErr&&!digit?" err":""}`}
-              type="tel" inputMode="numeric" maxLength={1} value={digit}
-              onChange={e=>handleChange(i,e.target.value)} onKeyDown={e=>handleKey(i,e)} onFocus={e=>e.target.select()}/>
+              type="tel"
+              maxLength={1}
+              value={digit}
+              onChange={e=>handleChange(i,e.target.value)}
+              onKeyDown={e=>handleKey(i,e)}
+            />
           ))}
         </div>
-        {showErr&&<div style={{...rg.errMsg,textAlign:"center"}}>Please enter all 4 digits</div>}
-        {error&&<div style={{...rg.errMsg,textAlign:"center"}}>{error}</div>}
-        <button className="verify-btn" onClick={handleLogin} disabled={loading}>{loading?"Verifying…":"Login"}</button>
-        <div style={rg.loginRow}>Didn't receive OTP?{" "}<span style={rg.loginLink} onClick={()=>onNavigate&&onNavigate("login")}>Resend</span></div>
+
+        {showErr && <div style={{...rg.errMsg,textAlign:"center"}}>Please enter all digits</div>}
+        {error && <div style={{...rg.errMsg,textAlign:"center"}}>{error}</div>}
+
+        <button className="verify-btn" onClick={handleLogin} disabled={loading}>
+          {loading ? "Verifying…" : "Login"}
+        </button>
+
+        <div style={rg.loginRow}>
+          Didn't receive OTP?{" "}
+          <span style={rg.loginLink} onClick={()=>sendOTP("+91"+form.phone)}>
+            Resend
+          </span>
+        </div>
+
       </div>
+
       <BottomScene/>
+
     </div>
   );
+
 }
 
-// ── TRANSLATIONS ────────────────────────────────────────────────
+/* ==== TRANSLATIONS ==== */
 const T = {
   en: {
     appTagline: "Smart Farming Assistant",
